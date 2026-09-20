@@ -1,0 +1,4 @@
+benchmarks/pilots/**/gpu_usage.csv -text
+benchmarks/pilots/**/results.json -text
+benchmarks/pilots/**/config.json -text
+benchmarks/pilots/**/*.safetensors binary

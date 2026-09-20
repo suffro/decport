@@ -1,7 +1,19 @@
 # Benchmarks
 
-No benchmark result has been accepted yet.
+This directory is the versioned record of DecPort experiments. It deliberately separates bounded
+pilots from benchmark evidence so exploratory results remain inspectable without overstating the
+project's validation status.
 
-`scripts/run_experiment.py` writes a complete run to a caller-selected output directory. Results
-belong here only after a meaningful run has been checked for reproducibility; tiny smoke-test output
-must not be published as evidence of transfer.
+## Layout
+
+- [`pilots/`](pilots/) contains bounded runs used to validate the pipeline and decide whether a
+  larger experiment is warranted.
+- Accepted benchmark results will receive their own top-level collection after a meaningful-scale,
+  multi-seed run has been reproduced. None has been accepted yet.
+
+Each recorded run should include a human-readable report, the runner's `results.json`, environment
+and data provenance, checksums, lightweight safetensors artifacts, and relevant resource telemetry.
+Base-model checkpoints and downloaded upstream datasets do not belong in Git.
+
+`scripts/run_experiment.py` still writes working output to ignored `runs/`. A run is copied here
+only when it is intentionally retained as project evidence.
