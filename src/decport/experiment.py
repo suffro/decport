@@ -1,4 +1,4 @@
-"""Reproducible source, native-target, and transfer experiment orchestration."""
+"""Reproducible source, native-target, transfer, and control orchestration."""
 
 from __future__ import annotations
 
@@ -36,7 +36,7 @@ class ExperimentConfig:
 
 
 def run_experiment(config: ExperimentConfig) -> dict[str, object]:
-    """Run the plan's three experiments and write their artifacts and metrics."""
+    """Run the plan's experiments and write their artifacts and metrics."""
 
     if config.shared_size <= 0:
         raise ValueError("shared_size must be positive")
@@ -93,10 +93,13 @@ def run_experiment(config: ExperimentConfig) -> dict[str, object]:
         key: value.detach().cpu().clone()
         for key, value in initial_target_adapter.state_dict().items()
     }
+    native_head = DecisionHead(config.shared_size).to(device)
+    random_control_head = DecisionHead(config.shared_size).to(device)
+    random_control_head.requires_grad_(False)
     native_model = DecPort(
         target_backbone,
         initial_target_adapter,
-        DecisionHead(config.shared_size).to(device),
+        native_head,
     )
     native_history = train_decision_model(
         native_model,
@@ -135,8 +138,36 @@ def run_experiment(config: ExperimentConfig) -> dict[str, object]:
         metadata={"role": "transfer_target", "head": "source/head.safetensors"},
     )
 
+    random_control_adapter = BackboneAdapter(
+        target_backbone.hidden_size, config.shared_size
+    ).to(device)
+    random_control_adapter.load_state_dict(initial_target_adapter_state)
+    random_control_model = DecPort(
+        target_backbone,
+        random_control_adapter,
+        random_control_head,
+    )
+    random_control_history = train_decision_model(
+        random_control_model,
+        train_examples,
+        config.training,
+        train_head=False,
+    )
+    random_control_metrics = _evaluate_all(
+        random_control_model, eval_examples, ood_examples, config
+    )
+    save_artifact(
+        random_control_model,
+        output_dir / "random_head_control",
+        include_head=True,
+        metadata={"role": "random_head_control", "head": "random_frozen"},
+    )
+
     native_accuracy = float(native_metrics["in_distribution"]["accuracy"])
     transfer_accuracy = float(transfer_metrics["in_distribution"]["accuracy"])
+    random_control_accuracy = float(
+        random_control_metrics["in_distribution"]["accuracy"]
+    )
     portability_ratio = (
         decision_portability_ratio(transfer_accuracy, native_accuracy)
         if native_accuracy > 0
@@ -156,10 +187,18 @@ def run_experiment(config: ExperimentConfig) -> dict[str, object]:
             "training": {"epoch_losses": list(transfer_history.epoch_losses)},
             "metrics": transfer_metrics,
         },
+        "random_head_control": {
+            "training": {"epoch_losses": list(random_control_history.epoch_losses)},
+            "metrics": random_control_metrics,
+        },
         "decision_portability_ratio": portability_ratio,
+        "decport_accuracy_gain_over_random_head": (
+            transfer_accuracy - random_control_accuracy
+        ),
         "adapter_size_bytes": {
             "native_target": parameter_size_bytes(native_model.adapter),
             "transfer_target": parameter_size_bytes(transfer_model.adapter),
+            "random_head_control": parameter_size_bytes(random_control_model.adapter),
         },
         "trainable_parameters": {
             "source": source_model_parameter_count_from_artifact(
@@ -172,6 +211,9 @@ def run_experiment(config: ExperimentConfig) -> dict[str, object]:
             ),
             "transfer_target": sum(
                 parameter.numel() for parameter in transfer_model.adapter.parameters()
+            ),
+            "random_head_control": sum(
+                parameter.numel() for parameter in random_control_model.adapter.parameters()
             ),
         },
     }

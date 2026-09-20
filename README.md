@@ -62,7 +62,8 @@ family:
 uv run python scripts/prepare_data.py --output data/v0.1
 ```
 
-Run source training, the native SmolLM baseline, and frozen-head transfer:
+Run source training, the native SmolLM baseline, frozen-head transfer, and the frozen random-head
+control:
 
 ```bash
 uv run python scripts/run_experiment.py \
@@ -75,7 +76,9 @@ uv run python scripts/run_experiment.py \
 
 The runner writes safetensors artifacts and `results.json` with accuracy, macro-F1, NLL, Brier score,
 ECE, option-order robustness, parameter counts, adapter sizes, and the Decision Portability Ratio.
-Backbones remain frozen in all three runs; transfer freezes the source-trained head as well.
+Backbones remain frozen in every run. Transfer freezes the source-trained head; the control freezes a
+fresh random head and trains only an identically initialized target adapter. Comparing those two runs
+tests whether the source head contributes more than an arbitrary fixed projection target.
 
 ## Benchmark status
 
@@ -84,6 +87,7 @@ Backbones remain frozen in all three runs; transfer freezes the source-trained h
 | Qwen3-0.6B | shared/source | adapter + head | pending | pending | pending | — |
 | SmolLM2-360M | native | adapter + native head | pending | pending | pending | 1.00 |
 | SmolLM2-360M | DecPort | adapter only | pending | pending | pending | pending |
+| SmolLM2-360M | random control | adapter only | pending | pending | pending | — |
 
 The `1.00` in the native row is the ratio definition, not an observed result.
 

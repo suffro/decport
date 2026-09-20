@@ -16,7 +16,7 @@ SmolLM2-360M-Instruct is the first target model.
 - `src/decport/train.py`: source/native or adapter-only training.
 - `src/decport/eval.py` and `metrics.py`: ID/OOD and calibration/robustness evaluation.
 - `src/decport/serialization.py`: safetensors artifacts.
-- `src/decport/experiment.py`: the source, native-target, and transfer experiment sequence.
+- `src/decport/experiment.py`: source, native-target, transfer, and random-head control sequence.
 
 ## Data flow
 
@@ -36,6 +36,7 @@ the runtime option set.
 - Both LLM backbones stay frozen and in evaluation mode during training.
 - No LoRA is used in v0.1.
 - The source/shared head is frozen during target transfer.
+- The random-head control freezes a fresh head and starts from the same target-adapter weights.
 - Both backbones use the same textual decision prompt.
 - Candidate order is shuffled during training and explicitly tested during evaluation.
 - Smoke-test metrics are not benchmark evidence.

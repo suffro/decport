@@ -9,10 +9,12 @@ The smallest credible v0.1 implementation and reproducible cross-backbone experi
 - Added package/CI skeleton and the unified decision schema.
 - Added real Qwen3-0.6B and SmolLM2-360M-Instruct frozen hidden-state extraction.
 - Added lightweight adapters, the shared scalar head, and dynamic Choice inference.
-- Added dataset conversion/preparation, option shuffling, three-mode training, evaluation metrics,
+- Added dataset conversion/preparation, option shuffling, four-mode training, evaluation metrics,
   safetensors artifacts, and the reproducible experiment runner.
-- Seeded component initialization and matched native/transfer target-adapter starting weights make
-  the baseline comparison controlled and repeatable.
+- Added a frozen random-head control to distinguish source-head transfer from an adapter learning
+  around any fixed head.
+- Seeded component initialization and matched native/transfer/control target-adapter starting weights
+  make the baseline comparison controlled and repeatable.
 - Verified a bounded real-model/data smoke run outside the repository. It is not benchmark evidence.
 
 ## Next
