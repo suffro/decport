@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "decport"
+version = "0.1.0.dev0"
+description = "Portable decision heads for frozen language-model backbones"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+dependencies = [
+  "safetensors>=0.4.5",
+  "torch>=2.4",
+  "transformers>=4.51,<6",
+]
+
+[project.optional-dependencies]
+train = ["datasets>=3.0"]
+dev = [
+  "pytest>=8.3",
+  "ruff>=0.9",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]

@@ -1,0 +1,5 @@
+include CHANGELOG.md
+recursive-include benchmarks *.md
+recursive-include configs *.json
+recursive-include examples *.md
+recursive-include scripts *.py
