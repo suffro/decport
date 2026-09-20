@@ -46,6 +46,7 @@ def run_experiment(config: ExperimentConfig) -> dict[str, object]:
     eval_examples = load_jsonl(config.eval_path)
     ood_examples = load_jsonl(config.ood_path) if config.ood_path else None
     device = resolve_device(config.device)
+    _seed_experiment(config.training.seed, device)
 
     source_backbone = QwenBackbone.from_pretrained(
         config.qwen_model_id,
@@ -85,9 +86,16 @@ def run_experiment(config: ExperimentConfig) -> dict[str, object]:
     )
     target_backbone.to(device)
 
+    initial_target_adapter = BackboneAdapter(
+        target_backbone.hidden_size, config.shared_size
+    ).to(device)
+    initial_target_adapter_state = {
+        key: value.detach().cpu().clone()
+        for key, value in initial_target_adapter.state_dict().items()
+    }
     native_model = DecPort(
         target_backbone,
-        BackboneAdapter(target_backbone.hidden_size, config.shared_size).to(device),
+        initial_target_adapter,
         DecisionHead(config.shared_size).to(device),
     )
     native_history = train_decision_model(
@@ -106,9 +114,11 @@ def run_experiment(config: ExperimentConfig) -> dict[str, object]:
 
     frozen_shared_head = DecisionHead(config.shared_size).to(device)
     frozen_shared_head.load_state_dict(shared_head_state)
+    transfer_adapter = BackboneAdapter(target_backbone.hidden_size, config.shared_size).to(device)
+    transfer_adapter.load_state_dict(initial_target_adapter_state)
     transfer_model = DecPort(
         target_backbone,
-        BackboneAdapter(target_backbone.hidden_size, config.shared_size).to(device),
+        transfer_adapter,
         frozen_shared_head,
     )
     transfer_history = train_decision_model(
@@ -213,6 +223,12 @@ def _release_device_cache(device: torch.device) -> None:
         torch.cuda.empty_cache()
     elif device.type == "mps":
         torch.mps.empty_cache()
+
+
+def _seed_experiment(seed: int, device: torch.device) -> None:
+    torch.manual_seed(seed)
+    if device.type == "cuda":
+        torch.cuda.manual_seed_all(seed)
 
 
 def source_model_parameter_count_from_artifact(path: Path, *, include_head: bool) -> int:

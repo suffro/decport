@@ -11,6 +11,8 @@ The smallest credible v0.1 implementation and reproducible cross-backbone experi
 - Added lightweight adapters, the shared scalar head, and dynamic Choice inference.
 - Added dataset conversion/preparation, option shuffling, three-mode training, evaluation metrics,
   safetensors artifacts, and the reproducible experiment runner.
+- Seeded component initialization and matched native/transfer target-adapter starting weights make
+  the baseline comparison controlled and repeatable.
 - Verified a bounded real-model/data smoke run outside the repository. It is not benchmark evidence.
 
 ## Next

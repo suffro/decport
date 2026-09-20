@@ -1,5 +1,8 @@
 import json
 
+import torch
+
+import decport.experiment as experiment_module
 from decport.backbones import QwenBackbone, SmolLMBackbone
 from decport.data import write_jsonl
 from decport.experiment import ExperimentConfig, run_experiment
@@ -19,6 +22,17 @@ def test_three_experiment_runner_writes_observed_results(tmp_path, monkeypatch) 
         "from_pretrained",
         lambda *_args, **_kwargs: SmolLMBackbone(FakeCausalLM(4), FakeTokenizer()),
     )
+    initial_adapters: list[dict[str, torch.Tensor]] = []
+    real_train = experiment_module.train_decision_model
+
+    def capture_initial_adapter(*args, **kwargs):
+        model = args[0]
+        initial_adapters.append(
+            {key: value.detach().clone() for key, value in model.adapter.state_dict().items()}
+        )
+        return real_train(*args, **kwargs)
+
+    monkeypatch.setattr(experiment_module, "train_decision_model", capture_initial_adapter)
     examples = [
         DecisionExample("first", "Pick", ("a", "bb"), "a"),
         DecisionExample("second", "Pick", ("a", "bb"), "bb"),
@@ -53,3 +67,8 @@ def test_three_experiment_runner_writes_observed_results(tmp_path, monkeypatch) 
     assert (output_path / "native_target" / "head.safetensors").is_file()
     assert not (output_path / "transfer_target" / "head.safetensors").exists()
     assert result["trainable_parameters"]["transfer_target"] > 0  # type: ignore[index]
+    assert initial_adapters[1].keys() == initial_adapters[2].keys()
+    assert all(
+        torch.equal(initial_adapters[1][key], initial_adapters[2][key])
+        for key in initial_adapters[1]
+    )
