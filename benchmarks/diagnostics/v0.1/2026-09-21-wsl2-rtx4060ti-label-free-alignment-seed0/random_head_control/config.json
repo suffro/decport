@@ -1,0 +1,11 @@
+{
+  "adapter_input_size": 960,
+  "backbone_model_id": "HuggingFaceTB/SmolLM2-360M-Instruct",
+  "format_version": 1,
+  "includes_head": true,
+  "metadata": {
+    "head": "random_frozen",
+    "role": "random_head_control"
+  },
+  "shared_size": 256
+}

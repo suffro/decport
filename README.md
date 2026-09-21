@@ -88,6 +88,12 @@ The first bounded CUDA pilot is archived under
 accuracy gain over the matched random-head control narrowed to +0.0063 ± 0.0450 by epoch 5. These
 are diagnostic results on small data, not accepted benchmark evidence.
 
+A subsequent bounded
+[`label-free latent-alignment diagnostic`](benchmarks/diagnostics/v0.1/2026-09-21-wsl2-rtx4060ti-label-free-alignment-seed0/)
+trained only a SmolLM adapter to match frozen trained Qwen latents, with all answer fields removed.
+It improved ID accuracy over the matched unaligned adapter (0.4219 versus 0.3281) but remained far
+below the supervised random-head control (0.7188), so it does not support a portability claim.
+
 | Backbone | Head | Trainable component | Accuracy | Brier | ECE | Portability Ratio |
 |---|---|---|---:|---:|---:|---:|
 | Qwen3-0.6B | shared/source | adapter + head | pending | pending | pending | — |

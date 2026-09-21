@@ -2,3 +2,7 @@ benchmarks/pilots/**/gpu_usage.csv -text
 benchmarks/pilots/**/results.json -text
 benchmarks/pilots/**/config.json -text
 benchmarks/pilots/**/*.safetensors binary
+benchmarks/diagnostics/**/*.json -text
+benchmarks/diagnostics/**/*.csv -text
+benchmarks/diagnostics/**/SHA256SUMS -text
+benchmarks/diagnostics/**/*.safetensors binary

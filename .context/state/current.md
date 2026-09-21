@@ -29,11 +29,22 @@ The smallest credible v0.1 implementation and reproducible cross-backbone experi
   advantage is primarily an early optimization effect on this data, not a clearly persistent
   convergence advantage. The run remains diagnostic rather than accepted benchmark evidence and is
   retained under `benchmarks/diagnostics/v0.1/2026-09-21-wsl2-rtx4060ti-seeds0-4/`.
+- Added a label-free latent-alignment path that strips and rejects decision labels, freezes all
+  components except a new SmolLM adapter, and minimizes cosine distance plus MSE to frozen trained
+  Qwen latents for identical inputs.
+- Ran the bounded seed-0 alignment diagnostic for five epochs. ID accuracy improved from 0.3281
+  unaligned to 0.4219 aligned, but remained below the supervised frozen random-head control at
+  0.7188; label-free DPR was 0.5745. This is not portability evidence. Results and provenance are
+  retained under
+  `benchmarks/diagnostics/v0.1/2026-09-21-wsl2-rtx4060ti-label-free-alignment-seed0/`.
 
 ## Next
 
 - Run a larger-data, independently reproduced multi-seed experiment before making portability
   claims; the bounded convergence diagnostic did not show a persistent transfer-over-random gain.
+- If latent alignment is pursued further, first test multiple seeds or stronger label-free
+  normalization/objectives; the initial direct cosine-plus-MSE method did not beat the ID random
+  control.
 - Commit benchmark results only after a reproducibility run.
 
 ## Blockers

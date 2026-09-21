@@ -1,0 +1,87 @@
+import json
+
+import decport.alignment_experiment as experiment_module
+from decport.alignment import AlignmentConfig
+from decport.alignment_experiment import (
+    AlignmentExperimentConfig,
+    run_alignment_experiment,
+)
+from decport.backbones import QwenBackbone, SmolLMBackbone
+from decport.data import write_jsonl
+from decport.schema import DecisionExample
+from decport.train import TrainingConfig
+from tests.fakes import FakeCausalLM, FakeTokenizer
+
+
+def test_alignment_experiment_records_controls_and_label_free_audit(
+    tmp_path, monkeypatch
+) -> None:
+    monkeypatch.setattr(
+        QwenBackbone,
+        "from_pretrained",
+        lambda *_args, **_kwargs: QwenBackbone(FakeCausalLM(5), FakeTokenizer()),
+    )
+    monkeypatch.setattr(
+        SmolLMBackbone,
+        "from_pretrained",
+        lambda *_args, **_kwargs: SmolLMBackbone(FakeCausalLM(4), FakeTokenizer()),
+    )
+    observed_alignment_examples = []
+    real_alignment = experiment_module.train_latent_alignment
+
+    def capture_alignment(source, target, examples, config):
+        observed_alignment_examples.extend(examples)
+        return real_alignment(source, target, examples, config)
+
+    monkeypatch.setattr(
+        experiment_module, "train_latent_alignment", capture_alignment
+    )
+    examples = [
+        DecisionExample("first", "Pick", ("a", "bb"), "a"),
+        DecisionExample("second", "Pick", ("a", "bb"), "bb"),
+    ]
+    train_path = tmp_path / "train.jsonl"
+    eval_path = tmp_path / "eval.jsonl"
+    output_path = tmp_path / "output"
+    write_jsonl(examples, train_path)
+    write_jsonl(examples, eval_path)
+
+    result = run_alignment_experiment(
+        AlignmentExperimentConfig(
+            train_path=str(train_path),
+            eval_path=str(eval_path),
+            output_dir=str(output_path),
+            shared_size=6,
+            device="cpu",
+            permutation_trials=0,
+            decision_training=TrainingConfig(epochs=1, learning_rate=1e-2),
+            alignment_training=AlignmentConfig(epochs=1, learning_rate=1e-2),
+        )
+    )
+
+    assert json.loads((output_path / "results.json").read_text()) == result
+    assert all(example.answer is None for example in observed_alignment_examples)
+    assert result["label_free_audit"]["alignment_examples_with_answers"] == 0
+    assert result["label_free_audit"]["decision_loss_used"] is False
+    assert set(result) >= {
+        "source",
+        "native_target",
+        "supervised_transfer_target",
+        "random_head_control",
+        "unaligned_target",
+        "label_free_aligned_target",
+        "comparisons",
+    }
+    assert len(
+        result["label_free_aligned_target"]["training"]["epoch_metrics"]
+    ) == 1
+    assert set(result["comparisons"]["in_distribution"]) >= {
+        "label_free_alignment_dpr",
+        "label_free_gain_over_unaligned",
+        "label_free_gain_over_random_head",
+    }
+    assert (output_path / "source" / "head.safetensors").is_file()
+    assert not (
+        output_path / "label_free_aligned_target" / "head.safetensors"
+    ).exists()
+    assert (output_path / "random_head_control" / "head.safetensors").is_file()

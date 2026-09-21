@@ -1,0 +1,23 @@
+{
+  "cuda": {"pytorch_cuda_version": "13.0", "wsl_cuda_umd_version": "13.3"},
+  "gpu": {
+    "memory_mib": 8188,
+    "model": "NVIDIA GeForce RTX 4060 Ti",
+    "windows_driver_version": "610.62",
+    "wsl_nvidia_smi_version": "610.43.02"
+  },
+  "operating_system": {
+    "host": "Windows",
+    "wsl_distribution": "Ubuntu 26.04 LTS",
+    "wsl_kernel": "6.18.33.2-microsoft-standard-WSL2",
+    "wsl_version": 2
+  },
+  "python": "3.13.15",
+  "packages": {
+    "datasets": "5.0.1",
+    "safetensors": "0.8.0",
+    "torch": "2.14.0+cu130",
+    "transformers": "5.17.0",
+    "uv": "0.12.17"
+  }
+}
