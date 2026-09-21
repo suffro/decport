@@ -16,3 +16,9 @@ The separate seed-0
 trained only the SmolLM adapter against frozen Qwen latents. Its ID accuracy was 0.4219 versus
 0.3281 unaligned and 0.7188 for the supervised frozen random-head control; label-free DPR was
 0.5745.
+
+The follow-up
+[`stronger-method comparison`](2026-09-21-wsl2-rtx4060ti-label-free-methods-seed0/) reproduced
+the 0.4219 baseline, while ridge and Procrustes reached 0.4062 and source-whitened matching reached
+0.2969. No stronger method recovered more frozen-head decision capability on the bounded seed-0
+run.

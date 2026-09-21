@@ -17,7 +17,8 @@ SmolLM2-360M-Instruct is the first target model.
 - `src/decport/eval.py` and `metrics.py`: ID/OOD and calibration/robustness evaluation.
 - `src/decport/serialization.py`: safetensors artifacts.
 - `src/decport/experiment.py`: source, native-target, transfer, and random-head control sequence.
-- `src/decport/alignment.py`: label-free cosine-plus-MSE matching with a hard no-answer guard.
+- `src/decport/alignment.py`: label-free iterative, whitened, ridge, and Procrustes matching with a
+  hard no-answer guard.
 - `src/decport/alignment_experiment.py`: bounded source/native/transfer/control/alignment diagnostic.
 
 ## Data flow
@@ -42,6 +43,8 @@ the runtime option set.
 - Label-free alignment freezes both backbones, the trained source adapter/head, and the target copy
   of the source head; only a fresh, matched-initialization target adapter is optimized.
 - Alignment inputs must have no `answer`, and the alignment trainer never invokes a decision head.
+- Closed-form ridge and Procrustes maps are folded into the target adapter's final linear layer, so
+  aligned artifacts retain the standard adapter-to-frozen-head inference path.
 - Both backbones use the same textual decision prompt.
 - Candidate order is shuffled during training and explicitly tested during evaluation.
 - Smoke-test metrics are not benchmark evidence.

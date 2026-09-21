@@ -37,14 +37,20 @@ The smallest credible v0.1 implementation and reproducible cross-backbone experi
   0.7188; label-free DPR was 0.5745. This is not portability evidence. Results and provenance are
   retained under
   `benchmarks/diagnostics/v0.1/2026-09-21-wsl2-rtx4060ti-label-free-alignment-seed0/`.
+- Compared stronger label-free alignment methods on the same bounded seed-0 setup. The existing
+  cosine-plus-MSE result reproduced at 0.4219 ID accuracy; ridge and orthogonal Procrustes each
+  reached 0.4062, and source-whitened matching reached 0.2969. Ridge produced the lowest raw latent
+  loss without improving frozen-head accuracy. No method materially exceeded the current result,
+  so this remains negative diagnostic evidence rather than a portability claim. Results are under
+  `benchmarks/diagnostics/v0.1/2026-09-21-wsl2-rtx4060ti-label-free-methods-seed0/`.
 
 ## Next
 
 - Run a larger-data, independently reproduced multi-seed experiment before making portability
   claims; the bounded convergence diagnostic did not show a persistent transfer-over-random gain.
 - If latent alignment is pursued further, first test multiple seeds or stronger label-free
-  normalization/objectives; the initial direct cosine-plus-MSE method did not beat the ID random
-  control.
+  objectives targeted at head-relevant geometry; whitening, ridge, and Procrustes did not improve
+  the ID cosine-plus-MSE result or beat the ID random control.
 - Commit benchmark results only after a reproducibility run.
 
 ## Blockers

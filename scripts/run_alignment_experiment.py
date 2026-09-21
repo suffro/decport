@@ -7,7 +7,7 @@ import argparse
 import json
 from pathlib import Path
 
-from decport.alignment import AlignmentConfig
+from decport.alignment import ALIGNMENT_METHODS, AlignmentConfig
 from decport.alignment_experiment import (
     AlignmentExperimentConfig,
     run_alignment_experiment,
@@ -31,6 +31,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--alignment-epochs", type=int)
     parser.add_argument("--learning-rate", type=float)
     parser.add_argument("--alignment-learning-rate", type=float)
+    parser.add_argument(
+        "--alignment-methods",
+        nargs="+",
+        choices=ALIGNMENT_METHODS,
+        default=("cosine_mse",),
+    )
+    parser.add_argument("--whitening-epsilon", type=float, default=1e-3)
+    parser.add_argument("--ridge-alpha", type=float, default=1.0)
     parser.add_argument("--weight-decay", type=float)
     parser.add_argument("--seed", type=int)
     parser.add_argument("--permutation-trials", type=int)
@@ -77,8 +85,11 @@ def main() -> None:
                 else learning_rate
             ),
             weight_decay=weight_decay,
+            whitening_epsilon=args.whitening_epsilon,
+            ridge_alpha=args.ridge_alpha,
             seed=seed,
         ),
+        alignment_methods=tuple(args.alignment_methods),
     )
     result = run_alignment_experiment(config)
     print(json.dumps(result, indent=2, sort_keys=True))

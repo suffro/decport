@@ -29,9 +29,9 @@ def test_alignment_experiment_records_controls_and_label_free_audit(
     observed_alignment_examples = []
     real_alignment = experiment_module.train_latent_alignment
 
-    def capture_alignment(source, target, examples, config):
+    def capture_alignment(source, target, examples, config, **kwargs):
         observed_alignment_examples.extend(examples)
-        return real_alignment(source, target, examples, config)
+        return real_alignment(source, target, examples, config, **kwargs)
 
     monkeypatch.setattr(
         experiment_module, "train_latent_alignment", capture_alignment
@@ -56,6 +56,12 @@ def test_alignment_experiment_records_controls_and_label_free_audit(
             permutation_trials=0,
             decision_training=TrainingConfig(epochs=1, learning_rate=1e-2),
             alignment_training=AlignmentConfig(epochs=1, learning_rate=1e-2),
+            alignment_methods=(
+                "cosine_mse",
+                "whitened_cosine_mse",
+                "ridge",
+                "orthogonal_procrustes",
+            ),
         )
     )
 
@@ -63,6 +69,11 @@ def test_alignment_experiment_records_controls_and_label_free_audit(
     assert all(example.answer is None for example in observed_alignment_examples)
     assert result["label_free_audit"]["alignment_examples_with_answers"] == 0
     assert result["label_free_audit"]["decision_loss_used"] is False
+    assert all(
+        f"{method['artifact']}.decision_head"
+        in result["label_free_audit"]["frozen_components"]
+        for method in result["alignment_methods"].values()
+    )
     assert set(result) >= {
         "source",
         "native_target",
@@ -71,6 +82,13 @@ def test_alignment_experiment_records_controls_and_label_free_audit(
         "unaligned_target",
         "label_free_aligned_target",
         "comparisons",
+        "alignment_methods",
+    }
+    assert set(result["alignment_methods"]) == {
+        "cosine_mse",
+        "whitened_cosine_mse",
+        "ridge",
+        "orthogonal_procrustes",
     }
     assert len(
         result["label_free_aligned_target"]["training"]["epoch_metrics"]
@@ -85,3 +103,5 @@ def test_alignment_experiment_records_controls_and_label_free_audit(
         output_path / "label_free_aligned_target" / "head.safetensors"
     ).exists()
     assert (output_path / "random_head_control" / "head.safetensors").is_file()
+    for method in result["alignment_methods"].values():
+        assert not (output_path / method["artifact"] / "head.safetensors").exists()

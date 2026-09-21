@@ -94,6 +94,10 @@ trained only a SmolLM adapter to match frozen trained Qwen latents, with all ans
 It improved ID accuracy over the matched unaligned adapter (0.4219 versus 0.3281) but remained far
 below the supervised random-head control (0.7188), so it does not support a portability claim.
 
+A bounded follow-up compared whitening, ridge, and orthogonal Procrustes against that label-free
+baseline. None exceeded 0.4219 ID accuracy; see the
+[`stronger-method diagnostic`](benchmarks/diagnostics/v0.1/2026-09-21-wsl2-rtx4060ti-label-free-methods-seed0/).
+
 | Backbone | Head | Trainable component | Accuracy | Brier | ECE | Portability Ratio |
 |---|---|---|---:|---:|---:|---:|
 | Qwen3-0.6B | shared/source | adapter + head | pending | pending | pending | — |
