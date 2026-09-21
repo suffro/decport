@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
-"""Run the three core DecPort v0.1 experiments."""
+"""Run the four controlled DecPort v0.1 experiment conditions."""
 
 from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
-from decport.experiment import ExperimentConfig, run_experiment
+from decport.experiment import (
+    ExperimentConfig,
+    aggregate_convergence_results,
+    run_experiment,
+)
 from decport.train import TrainingConfig
 
 
@@ -26,7 +31,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--epochs", type=int)
     parser.add_argument("--learning-rate", type=float)
     parser.add_argument("--weight-decay", type=float)
-    parser.add_argument("--seed", type=int)
+    seed_group = parser.add_mutually_exclusive_group()
+    seed_group.add_argument("--seed", type=int)
+    seed_group.add_argument("--seeds", type=int, nargs="+")
     parser.add_argument("--permutation-trials", type=int)
     return parser.parse_args()
 
@@ -34,11 +41,40 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     settings = _load_settings(args.config)
+    if args.seeds is None:
+        config = _make_config(args, settings, args.output, args.seed)
+        result = run_experiment(config)
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return
+
+    if len(set(args.seeds)) != len(args.seeds):
+        raise ValueError("seeds must be unique")
+    results = []
+    for seed in args.seeds:
+        seed_output = str(Path(args.output) / f"seed-{seed}")
+        print(f"starting seed {seed}: {seed_output}", file=sys.stderr, flush=True)
+        results.append(run_experiment(_make_config(args, settings, seed_output, seed)))
+        print(f"completed seed {seed}", file=sys.stderr, flush=True)
+    summary = aggregate_convergence_results(results)
+    summary_path = Path(args.output) / "convergence_summary.json"
+    summary_path.write_text(
+        json.dumps(summary, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    print(json.dumps(summary, indent=2, sort_keys=True))
+
+
+def _make_config(
+    args: argparse.Namespace,
+    settings: dict[str, object],
+    output_dir: str,
+    seed_override: int | None,
+) -> ExperimentConfig:
     config = ExperimentConfig(
         train_path=args.train,
         eval_path=args.eval,
         ood_path=args.ood,
-        output_dir=args.output,
+        output_dir=output_dir,
         qwen_model_id=_string_setting(
             settings, "source_backbone", args.qwen_model, "Qwen/Qwen3-0.6B"
         ),
@@ -62,11 +98,10 @@ def main() -> None:
             weight_decay=_float_setting(
                 settings, "weight_decay", args.weight_decay, 0.01
             ),
-            seed=_integer_setting(settings, "seed", args.seed, 0),
+            seed=_integer_setting(settings, "seed", seed_override, 0),
         ),
     )
-    result = run_experiment(config)
-    print(json.dumps(result, indent=2, sort_keys=True))
+    return config
 
 
 def _load_settings(path: str | None) -> dict[str, object]:

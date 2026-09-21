@@ -23,12 +23,17 @@ The smallest credible v0.1 implementation and reproducible cross-backbone experi
   directional pilot evidence only, not an accepted benchmark result. The report, metrics,
   telemetry, provenance, checksums, and lightweight model artifacts are retained under
   `benchmarks/pilots/v0.1/2026-09-21-wsl2-rtx4060ti-seed0/`.
+- Ran a controlled five-seed, five-epoch convergence diagnostic on the same bounded data and CUDA
+  setup. DecPort's mean in-distribution accuracy gain over the matched frozen random head peaked at
+  +0.1000 ± 0.0525 at epoch 2 and narrowed to +0.0063 ± 0.0450 at epoch 5. This suggests the pilot's
+  advantage is primarily an early optimization effect on this data, not a clearly persistent
+  convergence advantage. The run remains diagnostic rather than accepted benchmark evidence and is
+  retained under `benchmarks/diagnostics/v0.1/2026-09-21-wsl2-rtx4060ti-seeds0-4/`.
 
 ## Next
 
-- Run a larger, multi-seed configured experiment on suitable hardware to test whether the pilot's
-  transfer-over-random advantage is stable.
-- Review learning curves and native-target performance before interpreting portability.
+- Run a larger-data, independently reproduced multi-seed experiment before making portability
+  claims; the bounded convergence diagnostic did not show a persistent transfer-over-random gain.
 - Commit benchmark results only after a reproducibility run.
 
 ## Blockers

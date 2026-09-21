@@ -1,0 +1,339 @@
+{
+  "epochs": [
+    {
+      "decision_portability_ratio": {
+        "mean": 1.0747368421052632,
+        "standard_deviation": 0.2895417251241575
+      },
+      "decport_accuracy_gain_over_random_head": {
+        "mean": 0.021875,
+        "standard_deviation": 0.12283277504395966
+      },
+      "epoch": 1,
+      "native_target": {
+        "accuracy": {
+          "mean": 0.36875,
+          "standard_deviation": 0.0686433832390275
+        },
+        "loss": {
+          "mean": 1.0644005810130879,
+          "standard_deviation": 0.0812588865130113
+        },
+        "macro_f1": {
+          "mean": 0.22323119765225027,
+          "standard_deviation": 0.08712509707085264
+        },
+        "training_loss": {
+          "mean": 1.1450930387334666,
+          "standard_deviation": 0.08917455022149012
+        }
+      },
+      "random_head_control": {
+        "accuracy": {
+          "mean": 0.371875,
+          "standard_deviation": 0.035630482034348064
+        },
+        "loss": {
+          "mean": 1.0659932644081194,
+          "standard_deviation": 0.07630161914682292
+        },
+        "macro_f1": {
+          "mean": 0.2388984202412278,
+          "standard_deviation": 0.05389060190333613
+        },
+        "training_loss": {
+          "mean": 1.132564455029933,
+          "standard_deviation": 0.12152603969768802
+        }
+      },
+      "transfer_target": {
+        "accuracy": {
+          "mean": 0.39375,
+          "standard_deviation": 0.1242162932146987
+        },
+        "loss": {
+          "mean": 1.217044716465425,
+          "standard_deviation": 0.22702245609273874
+        },
+        "macro_f1": {
+          "mean": 0.25503724053724053,
+          "standard_deviation": 0.16261122429691965
+        },
+        "training_loss": {
+          "mean": 1.2137901048568893,
+          "standard_deviation": 0.08449340439561617
+        }
+      }
+    },
+    {
+      "decision_portability_ratio": {
+        "mean": 1.2382490783309963,
+        "standard_deviation": 0.18462013298697075
+      },
+      "decport_accuracy_gain_over_random_head": {
+        "mean": 0.1,
+        "standard_deviation": 0.052524175981161283
+      },
+      "epoch": 2,
+      "native_target": {
+        "accuracy": {
+          "mean": 0.521875,
+          "standard_deviation": 0.0754219899134198
+        },
+        "loss": {
+          "mean": 1.1305111092946365,
+          "standard_deviation": 0.180979896729494
+        },
+        "macro_f1": {
+          "mean": 0.4260889705571806,
+          "standard_deviation": 0.07665672769055545
+        },
+        "training_loss": {
+          "mean": 1.0452371705893255,
+          "standard_deviation": 0.07717921443601192
+        }
+      },
+      "random_head_control": {
+        "accuracy": {
+          "mean": 0.5375,
+          "standard_deviation": 0.08457730376702724
+        },
+        "loss": {
+          "mean": 0.9880939939261508,
+          "standard_deviation": 0.18472164550992606
+        },
+        "macro_f1": {
+          "mean": 0.45251490539524236,
+          "standard_deviation": 0.11265406954181384
+        },
+        "training_loss": {
+          "mean": 0.9675448294559829,
+          "standard_deviation": 0.046255505290913025
+        }
+      },
+      "transfer_target": {
+        "accuracy": {
+          "mean": 0.6375,
+          "standard_deviation": 0.05229125165837972
+        },
+        "loss": {
+          "mean": 0.8382001499418361,
+          "standard_deviation": 0.0829609156477673
+        },
+        "macro_f1": {
+          "mean": 0.574824597595835,
+          "standard_deviation": 0.07413468493916472
+        },
+        "training_loss": {
+          "mean": 1.0101152308204575,
+          "standard_deviation": 0.06006974469436414
+        }
+      }
+    },
+    {
+      "decision_portability_ratio": {
+        "mean": 1.096046511627907,
+        "standard_deviation": 0.13106170536792447
+      },
+      "decport_accuracy_gain_over_random_head": {
+        "mean": 0.078125,
+        "standard_deviation": 0.10245997694221876
+      },
+      "epoch": 3,
+      "native_target": {
+        "accuracy": {
+          "mean": 0.63125,
+          "standard_deviation": 0.05590169943749474
+        },
+        "loss": {
+          "mean": 0.8566693861526935,
+          "standard_deviation": 0.11447979806841196
+        },
+        "macro_f1": {
+          "mean": 0.5882913070018396,
+          "standard_deviation": 0.061382700335379944
+        },
+        "training_loss": {
+          "mean": 0.9298039819511381,
+          "standard_deviation": 0.1622666633235691
+        }
+      },
+      "random_head_control": {
+        "accuracy": {
+          "mean": 0.609375,
+          "standard_deviation": 0.06346905003621844
+        },
+        "loss": {
+          "mean": 0.8433571294302242,
+          "standard_deviation": 0.10701140039214127
+        },
+        "macro_f1": {
+          "mean": 0.5491343050279371,
+          "standard_deviation": 0.07501978383968255
+        },
+        "training_loss": {
+          "mean": 0.9286997422005243,
+          "standard_deviation": 0.13733769826693729
+        }
+      },
+      "transfer_target": {
+        "accuracy": {
+          "mean": 0.6875,
+          "standard_deviation": 0.05524271728019903
+        },
+        "loss": {
+          "mean": 0.8229173754924237,
+          "standard_deviation": 0.21312497450642806
+        },
+        "macro_f1": {
+          "mean": 0.6422666421263054,
+          "standard_deviation": 0.10802184747572867
+        },
+        "training_loss": {
+          "mean": 0.8352126641364784,
+          "standard_deviation": 0.08996696155255297
+        }
+      }
+    },
+    {
+      "decision_portability_ratio": {
+        "mean": 1.0558752581708106,
+        "standard_deviation": 0.07451369345693644
+      },
+      "decport_accuracy_gain_over_random_head": {
+        "mean": 0.05625,
+        "standard_deviation": 0.03921843874378479
+      },
+      "epoch": 4,
+      "native_target": {
+        "accuracy": {
+          "mean": 0.646875,
+          "standard_deviation": 0.09217425752345391
+        },
+        "loss": {
+          "mean": 0.8721735546906308,
+          "standard_deviation": 0.18404661712223325
+        },
+        "macro_f1": {
+          "mean": 0.6017071817877172,
+          "standard_deviation": 0.12044594192922108
+        },
+        "training_loss": {
+          "mean": 0.814299103892181,
+          "standard_deviation": 0.12041925164526027
+        }
+      },
+      "random_head_control": {
+        "accuracy": {
+          "mean": 0.621875,
+          "standard_deviation": 0.0792111990977286
+        },
+        "loss": {
+          "mean": 0.8415904859355947,
+          "standard_deviation": 0.13622339601935454
+        },
+        "macro_f1": {
+          "mean": 0.5767640075643172,
+          "standard_deviation": 0.09304593735816061
+        },
+        "training_loss": {
+          "mean": 0.8038572634742878,
+          "standard_deviation": 0.09100809893861057
+        }
+      },
+      "transfer_target": {
+        "accuracy": {
+          "mean": 0.678125,
+          "standard_deviation": 0.054798993489844315
+        },
+        "loss": {
+          "mean": 0.8803279637455581,
+          "standard_deviation": 0.19974169586486384
+        },
+        "macro_f1": {
+          "mean": 0.6386120236073387,
+          "standard_deviation": 0.07063608762255406
+        },
+        "training_loss": {
+          "mean": 0.6977370038894726,
+          "standard_deviation": 0.05679626075090264
+        }
+      }
+    },
+    {
+      "decision_portability_ratio": {
+        "mean": 1.0328205128205128,
+        "standard_deviation": 0.11436012417497161
+      },
+      "decport_accuracy_gain_over_random_head": {
+        "mean": 0.00625,
+        "standard_deviation": 0.04501518840902479
+      },
+      "epoch": 5,
+      "native_target": {
+        "accuracy": {
+          "mean": 0.690625,
+          "standard_deviation": 0.04739297152532219
+        },
+        "loss": {
+          "mean": 0.8791481946497436,
+          "standard_deviation": 0.2022270011936524
+        },
+        "macro_f1": {
+          "mean": 0.6644821823057117,
+          "standard_deviation": 0.05446769322248452
+        },
+        "training_loss": {
+          "mean": 0.6828770468593625,
+          "standard_deviation": 0.07336058138821448
+        }
+      },
+      "random_head_control": {
+        "accuracy": {
+          "mean": 0.703125,
+          "standard_deviation": 0.024705294220065465
+        },
+        "loss": {
+          "mean": 0.7462246409094884,
+          "standard_deviation": 0.052605373700679636
+        },
+        "macro_f1": {
+          "mean": 0.6652081852708011,
+          "standard_deviation": 0.033981147215106186
+        },
+        "training_loss": {
+          "mean": 0.7013794625618175,
+          "standard_deviation": 0.11643205154844523
+        }
+      },
+      "transfer_target": {
+        "accuracy": {
+          "mean": 0.709375,
+          "standard_deviation": 0.03597145135381668
+        },
+        "loss": {
+          "mean": 0.7921291684283399,
+          "standard_deviation": 0.10660142203691735
+        },
+        "macro_f1": {
+          "mean": 0.6802664441148643,
+          "standard_deviation": 0.051961421448244026
+        },
+        "training_loss": {
+          "mean": 0.5953867090877057,
+          "standard_deviation": 0.08920021936819557
+        }
+      }
+    }
+  ],
+  "seed_count": 5,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "standard_deviation": "sample (n-1)",
+  "status": "diagnostic_not_accepted_benchmark"
+}

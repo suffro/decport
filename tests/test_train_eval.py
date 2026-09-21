@@ -60,6 +60,24 @@ def test_transfer_training_keeps_shared_head_frozen() -> None:
     assert all(not parameter.requires_grad for parameter in model.head.parameters())
 
 
+def test_training_calls_epoch_callback_after_each_epoch() -> None:
+    observations: list[tuple[int, float, bool]] = []
+
+    train_decision_model(
+        make_model(),
+        training_examples(),
+        TrainingConfig(epochs=2, learning_rate=1e-2),
+        train_head=True,
+        epoch_callback=lambda model, epoch, loss: observations.append(
+            (epoch, loss, model.training)
+        ),
+    )
+
+    assert [epoch for epoch, _, _ in observations] == [1, 2]
+    assert all(loss > 0 for _, loss, _ in observations)
+    assert all(training for _, _, training in observations)
+
+
 class AnswerFromState(nn.Module):
     training: bool
 

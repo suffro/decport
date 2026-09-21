@@ -83,9 +83,10 @@ tests whether the source head contributes more than an arbitrary fixed projectio
 ## Benchmark status
 
 The first bounded CUDA pilot is archived under
-[`benchmarks/pilots/v0.1/`](benchmarks/pilots/v0.1/). On its 64-example in-distribution slice,
-frozen source-head transfer scored 53.12% versus 37.50% for the matched frozen random-head control.
-This is directional evidence for running a larger experiment, not an accepted benchmark result.
+[`benchmarks/pilots/v0.1/`](benchmarks/pilots/v0.1/). A subsequent five-seed, five-epoch
+[`convergence diagnostic`](benchmarks/diagnostics/v0.1/) found that the transfer condition's mean
+accuracy gain over the matched random-head control narrowed to +0.0063 ± 0.0450 by epoch 5. These
+are diagnostic results on small data, not accepted benchmark evidence.
 
 | Backbone | Head | Trainable component | Accuracy | Brier | ECE | Portability Ratio |
 |---|---|---|---:|---:|---:|---:|

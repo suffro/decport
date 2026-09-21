@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import gc
 import json
+import statistics
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
@@ -47,6 +48,7 @@ def run_experiment(config: ExperimentConfig) -> dict[str, object]:
     ood_examples = load_jsonl(config.ood_path) if config.ood_path else None
     device = resolve_device(config.device)
     _seed_experiment(config.training.seed, device)
+    learning_curves: dict[str, list[dict[str, float | int]]] = {}
 
     source_backbone = QwenBackbone.from_pretrained(
         config.qwen_model_id,
@@ -65,6 +67,9 @@ def run_experiment(config: ExperimentConfig) -> dict[str, object]:
         train_examples,
         config.training,
         train_head=True,
+        epoch_callback=_learning_curve_callback(
+            learning_curves, "source", eval_examples, config
+        ),
     )
     source_metrics = _evaluate_all(source_model, eval_examples, ood_examples, config)
     save_artifact(
@@ -106,6 +111,9 @@ def run_experiment(config: ExperimentConfig) -> dict[str, object]:
         train_examples,
         config.training,
         train_head=True,
+        epoch_callback=_learning_curve_callback(
+            learning_curves, "native_target", eval_examples, config
+        ),
     )
     native_metrics = _evaluate_all(native_model, eval_examples, ood_examples, config)
     save_artifact(
@@ -129,6 +137,9 @@ def run_experiment(config: ExperimentConfig) -> dict[str, object]:
         train_examples,
         config.training,
         train_head=False,
+        epoch_callback=_learning_curve_callback(
+            learning_curves, "transfer_target", eval_examples, config
+        ),
     )
     transfer_metrics = _evaluate_all(transfer_model, eval_examples, ood_examples, config)
     save_artifact(
@@ -152,6 +163,9 @@ def run_experiment(config: ExperimentConfig) -> dict[str, object]:
         train_examples,
         config.training,
         train_head=False,
+        epoch_callback=_learning_curve_callback(
+            learning_curves, "random_head_control", eval_examples, config
+        ),
     )
     random_control_metrics = _evaluate_all(
         random_control_model, eval_examples, ood_examples, config
@@ -175,6 +189,7 @@ def run_experiment(config: ExperimentConfig) -> dict[str, object]:
     )
     result: dict[str, object] = {
         "config": _config_to_dict(config),
+        "epoch_metrics": _combine_epoch_metrics(learning_curves),
         "source": {
             "training": {"epoch_losses": list(source_history.epoch_losses)},
             "metrics": source_metrics,
@@ -224,6 +239,53 @@ def run_experiment(config: ExperimentConfig) -> dict[str, object]:
     return result
 
 
+def aggregate_convergence_results(
+    results: list[dict[str, object]],
+) -> dict[str, object]:
+    """Aggregate matching per-epoch metrics across repeated seeded runs."""
+
+    if not results:
+        raise ValueError("at least one experiment result is required")
+    epoch_rows = [result["epoch_metrics"] for result in results]
+    if any(not isinstance(rows, list) for rows in epoch_rows):
+        raise ValueError("every result must contain an epoch_metrics list")
+    epoch_count = len(epoch_rows[0])  # type: ignore[arg-type]
+    if any(len(rows) != epoch_count for rows in epoch_rows):  # type: ignore[arg-type]
+        raise ValueError("all results must contain the same number of epochs")
+
+    conditions = ("native_target", "transfer_target", "random_head_control")
+    condition_metrics = ("accuracy", "macro_f1", "loss", "training_loss")
+    aggregate_epochs: list[dict[str, object]] = []
+    for epoch_index in range(epoch_count):
+        rows = [seed_rows[epoch_index] for seed_rows in epoch_rows]  # type: ignore[index]
+        expected_epoch = epoch_index + 1
+        if any(row["epoch"] != expected_epoch for row in rows):
+            raise ValueError("epoch_metrics entries must be ordered and one-indexed")
+        aggregate: dict[str, object] = {"epoch": expected_epoch}
+        for condition in conditions:
+            aggregate[condition] = {
+                metric: _mean_and_std(
+                    [float(row[condition][metric]) for row in rows]  # type: ignore[index]
+                )
+                for metric in condition_metrics
+            }
+        for metric in (
+            "decision_portability_ratio",
+            "decport_accuracy_gain_over_random_head",
+        ):
+            aggregate[metric] = _mean_and_std([float(row[metric]) for row in rows])
+        aggregate_epochs.append(aggregate)
+
+    seeds = [int(result["config"]["training"]["seed"]) for result in results]  # type: ignore[index]
+    return {
+        "status": "diagnostic_not_accepted_benchmark",
+        "seeds": seeds,
+        "seed_count": len(seeds),
+        "standard_deviation": "sample (n-1)",
+        "epochs": aggregate_epochs,
+    }
+
+
 def resolve_device(requested: str) -> torch.device:
     if requested != "auto":
         return torch.device(requested)
@@ -251,6 +313,67 @@ def _evaluate_all(model, eval_examples, ood_examples, config):
             seed=config.training.seed,
         ).to_dict()
     return result
+
+
+def _learning_curve_callback(curves, condition, eval_examples, config):
+    curve: list[dict[str, float | int]] = []
+    curves[condition] = curve
+
+    def record(model, epoch: int, training_loss: float) -> None:
+        metrics = evaluate(
+            model,
+            eval_examples,
+            permutation_trials=0,
+            seed=config.training.seed,
+        )
+        curve.append(
+            {
+                "epoch": epoch,
+                "accuracy": metrics.accuracy,
+                "macro_f1": metrics.macro_f1,
+                "loss": metrics.nll,
+                "training_loss": training_loss,
+            }
+        )
+
+    return record
+
+
+def _combine_epoch_metrics(
+    curves: dict[str, list[dict[str, float | int]]],
+) -> list[dict[str, object]]:
+    required = ("source", "native_target", "transfer_target", "random_head_control")
+    epoch_count = len(curves[required[0]])
+    if any(len(curves[condition]) != epoch_count for condition in required):
+        raise RuntimeError("all experiment conditions must record the same number of epochs")
+    rows: list[dict[str, object]] = []
+    for epoch_index in range(epoch_count):
+        conditions = {condition: curves[condition][epoch_index] for condition in required}
+        native_accuracy = float(conditions["native_target"]["accuracy"])
+        transfer_accuracy = float(conditions["transfer_target"]["accuracy"])
+        random_accuracy = float(conditions["random_head_control"]["accuracy"])
+        rows.append(
+            {
+                "epoch": epoch_index + 1,
+                **conditions,
+                "decision_portability_ratio": (
+                    decision_portability_ratio(transfer_accuracy, native_accuracy)
+                    if native_accuracy > 0
+                    else None
+                ),
+                "decport_accuracy_gain_over_random_head": (
+                    transfer_accuracy - random_accuracy
+                ),
+            }
+        )
+    return rows
+
+
+def _mean_and_std(values: list[float]) -> dict[str, float]:
+    return {
+        "mean": statistics.mean(values),
+        "standard_deviation": statistics.stdev(values) if len(values) > 1 else 0.0,
+    }
 
 
 def _config_to_dict(config: ExperimentConfig) -> dict[str, object]:

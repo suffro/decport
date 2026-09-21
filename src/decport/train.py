@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import random
+from collections.abc import Callable
 from dataclasses import dataclass
 
 import torch
@@ -38,12 +39,16 @@ class TrainingHistory:
     epoch_losses: tuple[float, ...]
 
 
+EpochCallback = Callable[[DecPort, int, float], None]
+
+
 def train_decision_model(
     model: DecPort,
     examples: list[DecisionExample],
     config: TrainingConfig,
     *,
     train_head: bool,
+    epoch_callback: EpochCallback | None = None,
 ) -> TrainingHistory:
     """Train an adapter and, for source/native runs, optionally its head."""
 
@@ -69,7 +74,7 @@ def train_decision_model(
     )
 
     epoch_losses: list[float] = []
-    for _ in range(config.epochs):
+    for epoch_index in range(config.epochs):
         epoch_examples = list(examples)
         rng.shuffle(epoch_examples)
         total_loss = 0.0
@@ -85,7 +90,10 @@ def train_decision_model(
             nn.utils.clip_grad_norm_(trainable, config.max_grad_norm)
             optimizer.step()
             total_loss += float(loss.detach())
-        epoch_losses.append(total_loss / len(epoch_examples))
+        epoch_loss = total_loss / len(epoch_examples)
+        epoch_losses.append(epoch_loss)
+        if epoch_callback is not None:
+            epoch_callback(model, epoch_index + 1, epoch_loss)
 
     model.eval()
     return TrainingHistory(epoch_losses=tuple(epoch_losses))

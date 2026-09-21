@@ -5,7 +5,11 @@ import torch
 import decport.experiment as experiment_module
 from decport.backbones import QwenBackbone, SmolLMBackbone
 from decport.data import write_jsonl
-from decport.experiment import ExperimentConfig, run_experiment
+from decport.experiment import (
+    ExperimentConfig,
+    aggregate_convergence_results,
+    run_experiment,
+)
 from decport.schema import DecisionExample
 from decport.train import TrainingConfig
 from tests.fakes import FakeCausalLM, FakeTokenizer
@@ -83,6 +87,7 @@ def test_four_experiment_runner_writes_observed_results(tmp_path, monkeypatch) -
         "random_head_control",
         "decision_portability_ratio",
         "decport_accuracy_gain_over_random_head",
+        "epoch_metrics",
     }
     assert (output_path / "source" / "head.safetensors").is_file()
     assert (output_path / "native_target" / "head.safetensors").is_file()
@@ -102,3 +107,55 @@ def test_four_experiment_runner_writes_observed_results(tmp_path, monkeypatch) -
     )
     assert heads_unchanged[3]
     assert not heads_trainable_after[3]
+    epoch = result["epoch_metrics"][0]  # type: ignore[index]
+    assert epoch["epoch"] == 1
+    assert epoch["native_target"]["loss"] > 0
+    assert epoch["decision_portability_ratio"] == (
+        epoch["transfer_target"]["accuracy"] / epoch["native_target"]["accuracy"]
+    )
+    assert epoch["decport_accuracy_gain_over_random_head"] == (
+        epoch["transfer_target"]["accuracy"]
+        - epoch["random_head_control"]["accuracy"]
+    )
+
+
+def test_convergence_aggregation_reports_mean_and_sample_standard_deviation() -> None:
+    def result(seed: int, transfer_accuracy: float) -> dict[str, object]:
+        return {
+            "config": {"training": {"seed": seed}},
+            "epoch_metrics": [
+                {
+                    "epoch": 1,
+                    "native_target": {
+                        "accuracy": 0.5,
+                        "macro_f1": 0.4,
+                        "loss": 1.0,
+                        "training_loss": 1.1,
+                    },
+                    "transfer_target": {
+                        "accuracy": transfer_accuracy,
+                        "macro_f1": 0.5,
+                        "loss": 0.9,
+                        "training_loss": 1.0,
+                    },
+                    "random_head_control": {
+                        "accuracy": 0.25,
+                        "macro_f1": 0.2,
+                        "loss": 1.2,
+                        "training_loss": 1.3,
+                    },
+                    "decision_portability_ratio": transfer_accuracy / 0.5,
+                    "decport_accuracy_gain_over_random_head": transfer_accuracy - 0.25,
+                }
+            ],
+        }
+
+    summary = aggregate_convergence_results([result(0, 0.5), result(1, 1.0)])
+
+    assert summary["status"] == "diagnostic_not_accepted_benchmark"
+    assert summary["seeds"] == [0, 1]
+    epoch = summary["epochs"][0]  # type: ignore[index]
+    assert epoch["transfer_target"]["accuracy"] == {  # type: ignore[index]
+        "mean": 0.75,
+        "standard_deviation": 2**-0.5 / 2,
+    }

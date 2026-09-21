@@ -8,6 +8,8 @@ project's validation status.
 
 - [`pilots/`](pilots/) contains bounded runs used to validate the pipeline and decide whether a
   larger experiment is warranted.
+- [`diagnostics/`](diagnostics/) contains controlled studies of experiment behavior that are not
+  accepted benchmark claims.
 - Accepted benchmark results will receive their own top-level collection after a meaningful-scale,
   multi-seed run has been reproduced. None has been accepted yet.
 

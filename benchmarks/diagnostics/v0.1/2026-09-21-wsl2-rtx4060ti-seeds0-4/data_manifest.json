@@ -1,0 +1,49 @@
+{
+  "preparation": {
+    "command": "uv run python scripts/prepare_data.py --output data/pilot-v0.1 --train-per-family 64 --eval-per-family 32 --ood 32 --seed 0",
+    "reused_from": "benchmarks/pilots/v0.1/2026-09-21-wsl2-rtx4060ti-seed0/data_manifest.json",
+    "seed": 0
+  },
+  "splits": {
+    "eval": {
+      "count": 64,
+      "families": {
+        "ag_news": {
+          "count": 32,
+          "dataset": "fancyzhx/ag_news",
+          "split": "test"
+        },
+        "sst2": {
+          "count": 32,
+          "dataset": "nyu-mll/glue",
+          "dataset_config": "sst2",
+          "split": "validation"
+        }
+      },
+      "sha256": "e35aea52f42063ed3f3ffb2e1157f57c75c9ba24680aab83c617109f088ee3f1"
+    },
+    "ood_boolq": {
+      "count": 32,
+      "dataset": "google/boolq",
+      "sha256": "c004666f80c197979947bb853aabcc5ecd6f3261c7ad24b1fb08d5ee5d736fdd",
+      "split": "validation"
+    },
+    "train": {
+      "count": 128,
+      "families": {
+        "ag_news": {
+          "count": 64,
+          "dataset": "fancyzhx/ag_news",
+          "split": "train"
+        },
+        "sst2": {
+          "count": 64,
+          "dataset": "nyu-mll/glue",
+          "dataset_config": "sst2",
+          "split": "train"
+        }
+      },
+      "sha256": "aec03770e073866a18671d0e025a401d4dbd2cdc9060a6ddee5d7da9115b4d47"
+    }
+  }
+}
