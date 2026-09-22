@@ -1,0 +1,16 @@
+{
+  "cache_batch_size": 32,
+  "centered_logit_mse_weight": 0.1,
+  "device": "cuda",
+  "epochs": 5,
+  "gemma_backbone": "unsloth/gemma-3-270m-it",
+  "learning_rate": 0.001,
+  "max_length": 512,
+  "permutation_trials": 3,
+  "seeds": [0, 1, 2, 3, 4],
+  "shared_size": 256,
+  "smollm_backbone": "HuggingFaceTB/SmolLM2-360M-Instruct",
+  "source_backbone": "Qwen/Qwen3-0.6B",
+  "temperature": 2.0,
+  "weight_decay": 0.01
+}

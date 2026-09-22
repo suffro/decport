@@ -1,0 +1,57 @@
+{
+  "preparation": {
+    "eval_per_family": 320,
+    "exact_record_overlap_across_splits": 0,
+    "ood": 320,
+    "script": "scripts/prepare_data.py",
+    "seed": 1729,
+    "train_per_family": 640
+  },
+  "splits": {
+    "eval": {
+      "count": 640,
+      "families": {
+        "ag_news": {
+          "count": 320,
+          "dataset": "fancyzhx/ag_news",
+          "fingerprint": "46d1f548ab027f9d",
+          "split": "test"
+        },
+        "sst2": {
+          "count": 320,
+          "dataset": "nyu-mll/glue",
+          "dataset_config": "sst2",
+          "fingerprint": "df1e960fd422988c",
+          "split": "validation"
+        }
+      },
+      "sha256": "1de3b420ded56c27ab6c2815e834f74f53d6b031415196483e3109ef26dcef23"
+    },
+    "ood_boolq": {
+      "count": 320,
+      "dataset": "google/boolq",
+      "fingerprint": "11c99968772f56f9",
+      "sha256": "8710045b7b75b979d80582bf3e017465c78bf9d0a3a9fa8af93288f3577ece2d",
+      "split": "validation"
+    },
+    "train": {
+      "count": 1280,
+      "families": {
+        "ag_news": {
+          "count": 640,
+          "dataset": "fancyzhx/ag_news",
+          "fingerprint": "deb0618b3b97c19b",
+          "split": "train"
+        },
+        "sst2": {
+          "count": 640,
+          "dataset": "nyu-mll/glue",
+          "dataset_config": "sst2",
+          "fingerprint": "97852407987cd0fe",
+          "split": "train"
+        }
+      },
+      "sha256": "78e19507e49f3616044ff3bde01f0867303dd9dc796aca8a9677e1f04738772a"
+    }
+  }
+}

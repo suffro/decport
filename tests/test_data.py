@@ -12,6 +12,7 @@ from decport.data import (
     write_jsonl,
 )
 from decport.schema import DecisionExample
+from scripts.prepare_data import _assert_disjoint
 
 
 def test_jsonl_round_trip(tmp_path) -> None:
@@ -56,3 +57,11 @@ def test_sst2_rejects_invalid_labels(label: object) -> None:
     error_type = TypeError if isinstance(label, (str, bool)) else ValueError
     with pytest.raises(error_type):
         convert_sst2({"sentence": "Text", "label": label})
+
+
+def test_preparation_rejects_cross_split_overlap() -> None:
+    example = DecisionExample("same", "question", ("a", "b"), "a")
+    distinct = DecisionExample("other", "question", ("a", "b"), "b")
+
+    with pytest.raises(ValueError, match="overlap"):
+        _assert_disjoint([example], [example], [distinct])

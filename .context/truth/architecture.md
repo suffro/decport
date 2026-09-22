@@ -3,12 +3,13 @@
 ## Overview
 
 DecPort is a Python/PyTorch proof of concept for transferring a learned decision head between frozen
-causal language-model backbones. Qwen3-0.6B is the source model and
-SmolLM2-360M-Instruct is the first target model.
+causal language-model backbones. Qwen3-0.6B is the source model; SmolLM2-360M-Instruct and Gemma 3
+270M Instruct are validated target models.
 
 ## Major components
 
-- `src/decport/backbones/`: one small interface plus shared Hugging Face hidden-state extraction.
+- `src/decport/backbones/`: one small interface, shared Hugging Face hidden-state extraction, Qwen,
+  SmolLM, and Gemma wrappers, plus an exact frozen-representation cache for scaled experiments.
 - `src/decport/adapter.py`: the only representation-dependent trainable component.
 - `src/decport/head.py`: the small shared scalar head.
 - `src/decport/model.py`: dynamic Choice scoring and Boolean/basic Score wrappers.
@@ -24,6 +25,8 @@ SmolLM2-360M-Instruct is the first target model.
   deterministic permuted-teacher control, and teacher/student behavior metrics.
 - `scripts/run_distillation_experiment.py`: controlled multi-seed distillation diagnostic and
   aggregate summary.
+- `src/decport/scale_experiment.py` and `scripts/run_scale_experiment.py`: shared-source,
+  two-target, five-seed scaled validation with per-target controls and aggregation.
 
 ## Data flow
 
@@ -34,7 +37,7 @@ the runtime option set.
 
 ## External systems
 
-- Hugging Face Transformers supplies Qwen3-0.6B and SmolLM2-360M-Instruct.
+- Hugging Face Transformers supplies Qwen3-0.6B, SmolLM2-360M-Instruct, and Gemma 3 270M Instruct.
 - Hugging Face Datasets supplies SST-2, AG News, and the held-out BoolQ family.
 - Artifacts use safetensors; no pickle checkpoint format is used.
 
@@ -54,6 +57,10 @@ the runtime option set.
   frozen Qwen head.
 - Direct logit matching is invariant to arbitrary per-decision offsets because logits are centered
   before MSE. The KL term uses temperature-softened candidate distributions.
-- Both backbones use the same textual decision prompt.
+- All backbones use the same textual decision prompt.
+- In the scaled two-target experiment, the exact same trained Qwen head artifact is used by both
+  targets within each seed and verified by SHA-256.
+- Frozen hidden-state caching is permitted as an exact execution optimization: it must not change
+  prompts, per-decision optimization steps, losses, trainable components, or evaluation behavior.
 - Candidate order is shuffled during training and explicitly tested during evaluation.
 - Smoke-test metrics are not benchmark evidence.

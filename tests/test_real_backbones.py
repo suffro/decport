@@ -5,7 +5,7 @@ import os
 import pytest
 
 from decport import BackboneAdapter, DecisionHead, DecPort
-from decport.backbones import QwenBackbone, SmolLMBackbone
+from decport.backbones import GemmaBackbone, QwenBackbone, SmolLMBackbone
 
 pytestmark = pytest.mark.skipif(
     os.environ.get("DECPORT_RUN_REAL_MODELS") != "1",
@@ -13,7 +13,7 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-@pytest.mark.parametrize("backbone_type", [QwenBackbone, SmolLMBackbone])
+@pytest.mark.parametrize("backbone_type", [QwenBackbone, SmolLMBackbone, GemmaBackbone])
 def test_real_backbone_choice(backbone_type: type) -> None:
     backbone = backbone_type.from_pretrained(model_kwargs={"dtype": "auto"})
     model = DecPort(

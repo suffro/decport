@@ -51,13 +51,24 @@ The smallest credible v0.1 implementation and reproducible cross-backbone experi
   bounded ID diagnostic. BoolQ OOD gains were small and calibration worsened, so this is not a
   general portability claim. Results are under
   `benchmarks/diagnostics/v0.1/2026-09-22-wsl2-rtx4060ti-decision-distillation-seeds0-2/`.
+- Ran the larger five-seed, two-target decision-transfer validation on disjoint 1,280/640/320
+  train/ID/OOD sets, exactly 10 times the earlier slices. With one exact frozen Qwen head shared by
+  both targets per seed, label-free distillation reached 0.7828 ± 0.0173 ID accuracy on SmolLM and
+  0.7888 ± 0.0295 on Gemma 3 270M. SmolLM unaligned/permuted accuracy was 0.4078/0.3713; Gemma
+  unaligned/permuted accuracy was 0.3938/0.3813. Correct-teacher gains exceeded +0.37 over both
+  controls for both targets and held in every seed. ID teacher agreement/correlation rose to
+  0.8169/0.8533 for SmolLM and 0.8113/0.8565 for Gemma, while KL fell to 0.2213 and 0.2003.
+  This is stronger evidence for input-specific cross-backbone decision transfer without target
+  labels. BoolQ gains remained small/noisy and calibration worsened, so it is not a general
+  portability or OOD claim. Results are under
+  `benchmarks/diagnostics/v0.1/2026-09-23-wsl2-rtx4060ti-decision-transfer-scale-seeds0-4/`.
 
 ## Next
 
-- Run a larger-data, independently reproduced multi-seed experiment before making portability
-  claims; the bounded convergence diagnostic did not show a persistent transfer-over-random gain.
-- Treat decision-space distillation as the leading bounded label-free method, but investigate its
-  poor BoolQ NLL/ECE and validate on larger data before any portability claim.
+- Treat decision-space distillation as replicated positive ID evidence on two target backbones, not
+  as a general portability claim. Broaden task families and target architectures before promotion.
+- Investigate the consistently poor BoolQ NLL/Brier/ECE without changing the archived protocol or
+  retroactively tuning this experiment.
 - Do not prioritize further global latent matching without a new head-relevant hypothesis;
   whitening, ridge, and Procrustes did not improve the existing baseline.
 - Commit benchmark results only after a reproducibility run.
@@ -65,4 +76,4 @@ The smallest credible v0.1 implementation and reproducible cross-backbone experi
 ## Blockers
 
 - No technical implementation blocker.
-- The core transfer hypothesis remains experimentally unverified at meaningful scale.
+- General portability and OOD calibration remain unverified beyond the two-target ID result.

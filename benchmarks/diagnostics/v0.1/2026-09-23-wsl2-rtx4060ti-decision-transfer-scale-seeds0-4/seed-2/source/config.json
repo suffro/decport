@@ -1,0 +1,11 @@
+{
+  "adapter_input_size": 1024,
+  "backbone_model_id": "Qwen/Qwen3-0.6B",
+  "format_version": 1,
+  "includes_head": true,
+  "metadata": {
+    "role": "source",
+    "shared_across_targets": "true"
+  },
+  "shared_size": 256
+}

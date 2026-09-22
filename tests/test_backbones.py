@@ -1,11 +1,12 @@
 import pytest
 import torch
 
-from decport.backbones import QwenBackbone, SmolLMBackbone
+from decport.backbones import CachedBackbone, GemmaBackbone, QwenBackbone, SmolLMBackbone
+from decport.schema import DecisionExample
 from tests.fakes import FakeCausalLM, FakeTokenizer
 
 
-@pytest.mark.parametrize("backbone_type", [QwenBackbone, SmolLMBackbone])
+@pytest.mark.parametrize("backbone_type", [QwenBackbone, SmolLMBackbone, GemmaBackbone])
 def test_backbone_is_frozen_and_extracts_last_non_padding_token(backbone_type: type) -> None:
     model = FakeCausalLM(hidden_size=4)
     backbone = backbone_type(model=model, tokenizer=FakeTokenizer())
@@ -42,3 +43,24 @@ def test_backbone_rejects_misaligned_batches() -> None:
 
     with pytest.raises(ValueError, match="equal lengths"):
         backbone.encode(states=["a"], questions=["q", "q"], options=["x"])
+
+
+def test_cached_backbone_prefills_exact_frozen_representations(monkeypatch) -> None:
+    backbone = SmolLMBackbone(FakeCausalLM(hidden_size=4), FakeTokenizer())
+    cached = CachedBackbone(backbone)
+    examples = [DecisionExample("state", "question", ("a", "bb"))]
+    expected = backbone.encode(["state", "state"], ["question", "question"], ["a", "bb"])
+
+    assert cached.prefill(examples, batch_size=1) == 2
+    monkeypatch.setattr(
+        backbone,
+        "encode",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            AssertionError("prefilled backbone must not be called")
+        ),
+    )
+
+    actual = cached.encode(["state", "state"], ["question", "question"], ["bb", "a"])
+
+    assert cached.cache_size == 2
+    assert torch.equal(actual, expected.flip(0))

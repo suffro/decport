@@ -1,0 +1,1551 @@
+{
+  "seed_count": 5,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "source": {
+    "metrics": {
+      "in_distribution": {
+        "accuracy": {
+          "mean": 0.8340625,
+          "standard_deviation": 0.027229672750971497
+        },
+        "brier": {
+          "mean": 0.25896399389716507,
+          "standard_deviation": 0.0491930566400413
+        },
+        "ece": {
+          "mean": 0.08830235635861754,
+          "standard_deviation": 0.041840658765594944
+        },
+        "macro_f1": {
+          "mean": 0.8412354340742864,
+          "standard_deviation": 0.02145688593721256
+        },
+        "nll": {
+          "mean": 0.5798989984550968,
+          "standard_deviation": 0.1716223554990666
+        },
+        "option_permutation_robustness": {
+          "mean": 1.0,
+          "standard_deviation": 0.0
+        }
+      },
+      "out_of_distribution": {
+        "accuracy": {
+          "mean": 0.6725,
+          "standard_deviation": 0.0046351240544347805
+        },
+        "brier": {
+          "mean": 0.5511551144053943,
+          "standard_deviation": 0.015246417279033092
+        },
+        "ece": {
+          "mean": 0.2350846065580845,
+          "standard_deviation": 0.02606651889138499
+        },
+        "macro_f1": {
+          "mean": 0.6549802865395467,
+          "standard_deviation": 0.003146273501754511
+        },
+        "nll": {
+          "mean": 1.1350189648475677,
+          "standard_deviation": 0.13052832785381577
+        },
+        "option_permutation_robustness": {
+          "mean": 1.0,
+          "standard_deviation": 0.0
+        }
+      }
+    }
+  },
+  "source_head_sha256_by_seed": {
+    "0": "58c6e80615a04e066d7bbf4c8c91614d4f287078fefbfbc92760a7559cc8ab30",
+    "1": "1ab502f79ce3f61590de220b27a6bef02f978489ef752322de563becb1119e4c",
+    "2": "5ac8e63fcadc152f69e69fad3aab8681ef112bfbeacb225e8baffcff1d85c415",
+    "3": "9a17d76a275e7249c0dbb2b32dedc6dddf4b59e014e2c531e0c3d11c02e07220",
+    "4": "aad596ff575335e1d939779ced785c830440ffa7ae3d33e1f8106447c9d7d239"
+  },
+  "standard_deviation": "sample (n-1)",
+  "status": "diagnostic_not_accepted_benchmark",
+  "targets": {
+    "gemma": {
+      "comparisons": {
+        "in_distribution": {
+          "distillation_gain_over_permuted_teacher": {
+            "mean": 0.4075,
+            "standard_deviation": 0.03881798471713853
+          },
+          "distillation_gain_over_unaligned": {
+            "mean": 0.395,
+            "standard_deviation": 0.04310914563639598
+          }
+        },
+        "out_of_distribution": {
+          "distillation_gain_over_permuted_teacher": {
+            "mean": 0.04874999999999998,
+            "standard_deviation": 0.09613121728918243
+          },
+          "distillation_gain_over_unaligned": {
+            "mean": 0.015000000000000013,
+            "standard_deviation": 0.09127996083478565
+          }
+        }
+      },
+      "decision_match": {
+        "decision_space_distillation": {
+          "in_distribution": {
+            "centered_logit_mse": {
+              "mean": 5.111111890864923,
+              "standard_deviation": 1.9083063187663338
+            },
+            "kl_divergence": {
+              "mean": 0.20031646378957932,
+              "standard_deviation": 0.04777953021417576
+            },
+            "probability_correlation": {
+              "mean": 0.8565339928366881,
+              "standard_deviation": 0.024665548202210896
+            },
+            "top_choice_agreement": {
+              "mean": 0.81125,
+              "standard_deviation": 0.02493644264675696
+            }
+          },
+          "out_of_distribution": {
+            "centered_logit_mse": {
+              "mean": 9.847653995493312,
+              "standard_deviation": 3.7642280162812733
+            },
+            "kl_divergence": {
+              "mean": 0.685129633716715,
+              "standard_deviation": 0.2029755669696977
+            },
+            "probability_correlation": {
+              "mean": 0.1051317507780327,
+              "standard_deviation": 0.0756580969286077
+            },
+            "top_choice_agreement": {
+              "mean": 0.5331250000000001,
+              "standard_deviation": 0.03244586838104353
+            }
+          },
+          "train": {
+            "centered_logit_mse": {
+              "mean": 4.550450087757149,
+              "standard_deviation": 1.6006436473456656
+            },
+            "kl_divergence": {
+              "mean": 0.16577657341594942,
+              "standard_deviation": 0.044852860299594156
+            },
+            "probability_correlation": {
+              "mean": 0.8824896257805125,
+              "standard_deviation": 0.030562268876580888
+            },
+            "top_choice_agreement": {
+              "mean": 0.8465625,
+              "standard_deviation": 0.02762467300428638
+            }
+          }
+        },
+        "native_target": {
+          "in_distribution": {
+            "centered_logit_mse": {
+              "mean": 10.382630552517245,
+              "standard_deviation": 1.7509084215512454
+            },
+            "kl_divergence": {
+              "mean": 0.3604987561116241,
+              "standard_deviation": 0.051256898036398144
+            },
+            "probability_correlation": {
+              "mean": 0.8216506721221477,
+              "standard_deviation": 0.018875321069442945
+            },
+            "top_choice_agreement": {
+              "mean": 0.8009375,
+              "standard_deviation": 0.013648417376201547
+            }
+          },
+          "out_of_distribution": {
+            "centered_logit_mse": {
+              "mean": 10.13537746397185,
+              "standard_deviation": 1.683347930569556
+            },
+            "kl_divergence": {
+              "mean": 0.695947064721986,
+              "standard_deviation": 0.09064778471160491
+            },
+            "probability_correlation": {
+              "mean": 0.10601731562083974,
+              "standard_deviation": 0.02027588135549795
+            },
+            "top_choice_agreement": {
+              "mean": 0.538125,
+              "standard_deviation": 0.014724023736737186
+            }
+          },
+          "train": {
+            "centered_logit_mse": {
+              "mean": 10.38139382515171,
+              "standard_deviation": 1.921480873454666
+            },
+            "kl_divergence": {
+              "mean": 0.30998120145099506,
+              "standard_deviation": 0.06726289667885403
+            },
+            "probability_correlation": {
+              "mean": 0.8606673071414642,
+              "standard_deviation": 0.01242384233403068
+            },
+            "top_choice_agreement": {
+              "mean": 0.84078125,
+              "standard_deviation": 0.01787850981713101
+            }
+          }
+        },
+        "permuted_teacher_distillation": {
+          "in_distribution": {
+            "centered_logit_mse": {
+              "mean": 16.939916546453876,
+              "standard_deviation": 6.108628778181917
+            },
+            "kl_divergence": {
+              "mean": 0.629337898674421,
+              "standard_deviation": 0.07934668075703295
+            },
+            "probability_correlation": {
+              "mean": 0.35220288259609456,
+              "standard_deviation": 0.02201243474035904
+            },
+            "top_choice_agreement": {
+              "mean": 0.4315625,
+              "standard_deviation": 0.06732725290976159
+            }
+          },
+          "out_of_distribution": {
+            "centered_logit_mse": {
+              "mean": 4.882195247863538,
+              "standard_deviation": 1.425757895920504
+            },
+            "kl_divergence": {
+              "mean": 0.2722143604326993,
+              "standard_deviation": 0.039930340895756034
+            },
+            "probability_correlation": {
+              "mean": -0.034601287375665354,
+              "standard_deviation": 0.19888050113442943
+            },
+            "top_choice_agreement": {
+              "mean": 0.486875,
+              "standard_deviation": 0.09584635328221935
+            }
+          },
+          "train": {
+            "centered_logit_mse": {
+              "mean": 16.470597777313845,
+              "standard_deviation": 5.598075157639683
+            },
+            "kl_divergence": {
+              "mean": 0.6192356571182609,
+              "standard_deviation": 0.07499858468059724
+            },
+            "probability_correlation": {
+              "mean": 0.3716939047331688,
+              "standard_deviation": 0.03702192456910703
+            },
+            "top_choice_agreement": {
+              "mean": 0.45640625,
+              "standard_deviation": 0.06044320762216587
+            }
+          }
+        },
+        "random_head_control": {
+          "in_distribution": {
+            "centered_logit_mse": {
+              "mean": 10.388825177069771,
+              "standard_deviation": 4.388733475721375
+            },
+            "kl_divergence": {
+              "mean": 0.38155325541476487,
+              "standard_deviation": 0.08122422061817448
+            },
+            "probability_correlation": {
+              "mean": 0.7600031005014929,
+              "standard_deviation": 0.04981032363219229
+            },
+            "top_choice_agreement": {
+              "mean": 0.771875,
+              "standard_deviation": 0.03451675317871019
+            }
+          },
+          "out_of_distribution": {
+            "centered_logit_mse": {
+              "mean": 5.489026208397004,
+              "standard_deviation": 1.3368130592648335
+            },
+            "kl_divergence": {
+              "mean": 0.3322041424247436,
+              "standard_deviation": 0.03726647632138796
+            },
+            "probability_correlation": {
+              "mean": 0.02485022900823018,
+              "standard_deviation": 0.026352443427819384
+            },
+            "top_choice_agreement": {
+              "mean": 0.51125,
+              "standard_deviation": 0.03539674684911031
+            }
+          },
+          "train": {
+            "centered_logit_mse": {
+              "mean": 9.176196661028929,
+              "standard_deviation": 3.191099671210752
+            },
+            "kl_divergence": {
+              "mean": 0.30369118469639944,
+              "standard_deviation": 0.057649008620737074
+            },
+            "probability_correlation": {
+              "mean": 0.8200475458838022,
+              "standard_deviation": 0.03434950524932907
+            },
+            "top_choice_agreement": {
+              "mean": 0.81546875,
+              "standard_deviation": 0.029071529175358997
+            }
+          }
+        },
+        "supervised_transfer_target": {
+          "in_distribution": {
+            "centered_logit_mse": {
+              "mean": 9.228709640593843,
+              "standard_deviation": 2.3416565593263052
+            },
+            "kl_divergence": {
+              "mean": 0.33323923787427245,
+              "standard_deviation": 0.05331558478413716
+            },
+            "probability_correlation": {
+              "mean": 0.8243087693981894,
+              "standard_deviation": 0.01859741173030833
+            },
+            "top_choice_agreement": {
+              "mean": 0.8,
+              "standard_deviation": 0.010126157341262258
+            }
+          },
+          "out_of_distribution": {
+            "centered_logit_mse": {
+              "mean": 7.478407955290241,
+              "standard_deviation": 1.4420261348964205
+            },
+            "kl_divergence": {
+              "mean": 0.5069949967067805,
+              "standard_deviation": 0.05531810641900842
+            },
+            "probability_correlation": {
+              "mean": 0.03246676725400078,
+              "standard_deviation": 0.030119723489032576
+            },
+            "top_choice_agreement": {
+              "mean": 0.494375,
+              "standard_deviation": 0.006011057519272319
+            }
+          },
+          "train": {
+            "centered_logit_mse": {
+              "mean": 8.709742621817133,
+              "standard_deviation": 1.6825665426959961
+            },
+            "kl_divergence": {
+              "mean": 0.27056481719511394,
+              "standard_deviation": 0.041822126331223446
+            },
+            "probability_correlation": {
+              "mean": 0.869509820317595,
+              "standard_deviation": 0.013523965618849972
+            },
+            "top_choice_agreement": {
+              "mean": 0.85125,
+              "standard_deviation": 0.012962630333240624
+            }
+          }
+        },
+        "unaligned_target": {
+          "in_distribution": {
+            "centered_logit_mse": {
+              "mean": 18.155264288528844,
+              "standard_deviation": 7.606277191808833
+            },
+            "kl_divergence": {
+              "mean": 0.6414726663287729,
+              "standard_deviation": 0.0787531449138
+            },
+            "probability_correlation": {
+              "mean": 0.3159672550635573,
+              "standard_deviation": 0.019807666582243064
+            },
+            "top_choice_agreement": {
+              "mean": 0.40375,
+              "standard_deviation": 0.04093332516880347
+            }
+          },
+          "out_of_distribution": {
+            "centered_logit_mse": {
+              "mean": 4.77640482830035,
+              "standard_deviation": 1.3587547795399226
+            },
+            "kl_divergence": {
+              "mean": 0.26292201461270454,
+              "standard_deviation": 0.03625331752978562
+            },
+            "probability_correlation": {
+              "mean": 0.09033719633209437,
+              "standard_deviation": 0.20763626307982477
+            },
+            "top_choice_agreement": {
+              "mean": 0.558125,
+              "standard_deviation": 0.10166100991776542
+            }
+          },
+          "train": {
+            "centered_logit_mse": {
+              "mean": 17.683717571144783,
+              "standard_deviation": 7.036149697087394
+            },
+            "kl_divergence": {
+              "mean": 0.6401629869383759,
+              "standard_deviation": 0.08455646876788926
+            },
+            "probability_correlation": {
+              "mean": 0.31834550860873734,
+              "standard_deviation": 0.026205012421840434
+            },
+            "top_choice_agreement": {
+              "mean": 0.4025,
+              "standard_deviation": 0.044625038296552184
+            }
+          }
+        }
+      },
+      "metrics": {
+        "decision_space_distillation": {
+          "in_distribution": {
+            "accuracy": {
+              "mean": 0.78875,
+              "standard_deviation": 0.029530836637318637
+            },
+            "brier": {
+              "mean": 0.3111269357927932,
+              "standard_deviation": 0.05632944416389794
+            },
+            "dpr_vs_native_target": {
+              "mean": 0.9786184631435425,
+              "standard_deviation": 0.04038240388436003
+            },
+            "ece": {
+              "mean": 0.10202411144040524,
+              "standard_deviation": 0.04491148793090125
+            },
+            "macro_f1": {
+              "mean": 0.8029384216099335,
+              "standard_deviation": 0.027126084747229336
+            },
+            "nll": {
+              "mean": 0.5971769450216836,
+              "standard_deviation": 0.17133176531266534
+            },
+            "option_permutation_robustness": {
+              "mean": 1.0,
+              "standard_deviation": 0.0
+            }
+          },
+          "out_of_distribution": {
+            "accuracy": {
+              "mean": 0.563125,
+              "standard_deviation": 0.014888911561964514
+            },
+            "brier": {
+              "mean": 0.7170412629986316,
+              "standard_deviation": 0.02894207954905114
+            },
+            "dpr_vs_native_target": {
+              "mean": 1.0345750114620273,
+              "standard_deviation": 0.030497381060814635
+            },
+            "ece": {
+              "mean": 0.3283218747004866,
+              "standard_deviation": 0.027822594812789887
+            },
+            "macro_f1": {
+              "mean": 0.45349399164872645,
+              "standard_deviation": 0.03873774249016349
+            },
+            "nll": {
+              "mean": 1.6462067740250825,
+              "standard_deviation": 0.41915066161597203
+            },
+            "option_permutation_robustness": {
+              "mean": 1.0,
+              "standard_deviation": 0.0
+            }
+          }
+        },
+        "native_target": {
+          "in_distribution": {
+            "accuracy": {
+              "mean": 0.8065625,
+              "standard_deviation": 0.03106193409947296
+            },
+            "brier": {
+              "mean": 0.31198809529231714,
+              "standard_deviation": 0.048712680294423646
+            },
+            "dpr_vs_native_target": {
+              "mean": 1.0,
+              "standard_deviation": 0.0
+            },
+            "ece": {
+              "mean": 0.12480485713109375,
+              "standard_deviation": 0.025062412905727305
+            },
+            "macro_f1": {
+              "mean": 0.8195422952643706,
+              "standard_deviation": 0.025464154391634946
+            },
+            "nll": {
+              "mean": 0.6966770615862139,
+              "standard_deviation": 0.13078786098343798
+            },
+            "option_permutation_robustness": {
+              "mean": 1.0,
+              "standard_deviation": 0.0
+            }
+          },
+          "out_of_distribution": {
+            "accuracy": {
+              "mean": 0.5443749999999999,
+              "standard_deviation": 0.006774838558962103
+            },
+            "brier": {
+              "mean": 0.7557479398788371,
+              "standard_deviation": 0.013809988188948403
+            },
+            "dpr_vs_native_target": {
+              "mean": 1.0,
+              "standard_deviation": 0.0
+            },
+            "ece": {
+              "mean": 0.33904570672661066,
+              "standard_deviation": 0.010943045686572807
+            },
+            "macro_f1": {
+              "mean": 0.5189694931435249,
+              "standard_deviation": 0.017790759437177065
+            },
+            "nll": {
+              "mean": 1.8643138548587683,
+              "standard_deviation": 0.25551140001610967
+            },
+            "option_permutation_robustness": {
+              "mean": 1.0,
+              "standard_deviation": 0.0
+            }
+          }
+        },
+        "permuted_teacher_distillation": {
+          "in_distribution": {
+            "accuracy": {
+              "mean": 0.38125,
+              "standard_deviation": 0.03009587544415347
+            },
+            "brier": {
+              "mean": 0.7115375014337707,
+              "standard_deviation": 0.11163924955662226
+            },
+            "dpr_vs_native_target": {
+              "mean": 0.47418281995202916,
+              "standard_deviation": 0.0544981549549235
+            },
+            "ece": {
+              "mean": 0.1834961970988661,
+              "standard_deviation": 0.11303437951749261
+            },
+            "macro_f1": {
+              "mean": 0.22553522233044296,
+              "standard_deviation": 0.039765921280573206
+            },
+            "nll": {
+              "mean": 1.189555851382403,
+              "standard_deviation": 0.23692333213467087
+            },
+            "option_permutation_robustness": {
+              "mean": 1.0,
+              "standard_deviation": 0.0
+            }
+          },
+          "out_of_distribution": {
+            "accuracy": {
+              "mean": 0.514375,
+              "standard_deviation": 0.09064116235188076
+            },
+            "brier": {
+              "mean": 0.5147278052017811,
+              "standard_deviation": 0.028092344414609307
+            },
+            "dpr_vs_native_target": {
+              "mean": 0.9439496891459118,
+              "standard_deviation": 0.15917623338485137
+            },
+            "ece": {
+              "mean": 0.08684562433511021,
+              "standard_deviation": 0.0693066770414914
+            },
+            "macro_f1": {
+              "mean": 0.43483150766578843,
+              "standard_deviation": 0.09146268123588103
+            },
+            "nll": {
+              "mean": 0.7098648111334073,
+              "standard_deviation": 0.027960989617745347
+            },
+            "option_permutation_robustness": {
+              "mean": 1.0,
+              "standard_deviation": 0.0
+            }
+          }
+        },
+        "random_head_control": {
+          "in_distribution": {
+            "accuracy": {
+              "mean": 0.7903125,
+              "standard_deviation": 0.041581292743852964
+            },
+            "brier": {
+              "mean": 0.3512678341987848,
+              "standard_deviation": 0.058287473395707494
+            },
+            "dpr_vs_native_target": {
+              "mean": 0.9798769023291188,
+              "standard_deviation": 0.036456124980423166
+            },
+            "ece": {
+              "mean": 0.14287289440631867,
+              "standard_deviation": 0.031896805275121884
+            },
+            "macro_f1": {
+              "mean": 0.8043555890880495,
+              "standard_deviation": 0.03948432198338333
+            },
+            "nll": {
+              "mean": 0.7357564743898998,
+              "standard_deviation": 0.13579549980150685
+            },
+            "option_permutation_robustness": {
+              "mean": 1.0,
+              "standard_deviation": 0.0
+            }
+          },
+          "out_of_distribution": {
+            "accuracy": {
+              "mean": 0.5175,
+              "standard_deviation": 0.025155764746872627
+            },
+            "brier": {
+              "mean": 0.5607211702171924,
+              "standard_deviation": 0.02430741858770958
+            },
+            "dpr_vs_native_target": {
+              "mean": 0.9510080363581855,
+              "standard_deviation": 0.05345356776633427
+            },
+            "ece": {
+              "mean": 0.132682624720037,
+              "standard_deviation": 0.02920279498862846
+            },
+            "macro_f1": {
+              "mean": 0.4941778616491261,
+              "standard_deviation": 0.01143499881222275
+            },
+            "nll": {
+              "mean": 0.8286723729445201,
+              "standard_deviation": 0.05637418502428329
+            },
+            "option_permutation_robustness": {
+              "mean": 1.0,
+              "standard_deviation": 0.0
+            }
+          }
+        },
+        "supervised_transfer_target": {
+          "in_distribution": {
+            "accuracy": {
+              "mean": 0.8196875,
+              "standard_deviation": 0.012913095944621486
+            },
+            "brier": {
+              "mean": 0.2876472986345405,
+              "standard_deviation": 0.02620338126482845
+            },
+            "dpr_vs_native_target": {
+              "mean": 1.0171060657275088,
+              "standard_deviation": 0.028947243129048603
+            },
+            "ece": {
+              "mean": 0.11240656416863207,
+              "standard_deviation": 0.0228246929001362
+            },
+            "macro_f1": {
+              "mean": 0.828815959091537,
+              "standard_deviation": 0.012227699402052958
+            },
+            "nll": {
+              "mean": 0.6441828851948749,
+              "standard_deviation": 0.1142157685255234
+            },
+            "option_permutation_robustness": {
+              "mean": 1.0,
+              "standard_deviation": 0.0
+            }
+          },
+          "out_of_distribution": {
+            "accuracy": {
+              "mean": 0.545625,
+              "standard_deviation": 0.009782797401561585
+            },
+            "brier": {
+              "mean": 0.6837756873179962,
+              "standard_deviation": 0.017316515976216907
+            },
+            "dpr_vs_native_target": {
+              "mean": 1.002390597573224,
+              "standard_deviation": 0.020078411490520837
+            },
+            "ece": {
+              "mean": 0.26346484925597907,
+              "standard_deviation": 0.017994870483059464
+            },
+            "macro_f1": {
+              "mean": 0.5310534930930711,
+              "standard_deviation": 0.016451791975825143
+            },
+            "nll": {
+              "mean": 1.3299701004381024,
+              "standard_deviation": 0.13918975719105603
+            },
+            "option_permutation_robustness": {
+              "mean": 1.0,
+              "standard_deviation": 0.0
+            }
+          }
+        },
+        "unaligned_target": {
+          "in_distribution": {
+            "accuracy": {
+              "mean": 0.39375,
+              "standard_deviation": 0.026562499999999985
+            },
+            "brier": {
+              "mean": 0.6302121589112188,
+              "standard_deviation": 0.008667729203802514
+            },
+            "dpr_vs_native_target": {
+              "mean": 0.4884537214665807,
+              "standard_deviation": 0.032215295682203424
+            },
+            "ece": {
+              "mean": 0.06389594251289965,
+              "standard_deviation": 0.034342979228065756
+            },
+            "macro_f1": {
+              "mean": 0.2627335164305445,
+              "standard_deviation": 0.06507889241419836
+            },
+            "nll": {
+              "mean": 1.0472320882466983,
+              "standard_deviation": 0.018393541968370924
+            },
+            "option_permutation_robustness": {
+              "mean": 1.0,
+              "standard_deviation": 0.0
+            }
+          },
+          "out_of_distribution": {
+            "accuracy": {
+              "mean": 0.548125,
+              "standard_deviation": 0.08278596272919704
+            },
+            "brier": {
+              "mean": 0.4978029415446897,
+              "standard_deviation": 0.020020585037755362
+            },
+            "dpr_vs_native_target": {
+              "mean": 1.0064645658564881,
+              "standard_deviation": 0.14794301708297503
+            },
+            "ece": {
+              "mean": 0.05985986910760403,
+              "standard_deviation": 0.05076150057099875
+            },
+            "macro_f1": {
+              "mean": 0.41346717892966467,
+              "standard_deviation": 0.055782983792353705
+            },
+            "nll": {
+              "mean": 0.6910060426810011,
+              "standard_deviation": 0.020140173325739894
+            },
+            "option_permutation_robustness": {
+              "mean": 1.0,
+              "standard_deviation": 0.0
+            }
+          }
+        }
+      },
+      "model_id": "unsloth/gemma-3-270m-it"
+    },
+    "smollm": {
+      "comparisons": {
+        "in_distribution": {
+          "distillation_gain_over_permuted_teacher": {
+            "mean": 0.4115625,
+            "standard_deviation": 0.022496744556157428
+          },
+          "distillation_gain_over_unaligned": {
+            "mean": 0.375,
+            "standard_deviation": 0.01729370595404583
+          }
+        },
+        "out_of_distribution": {
+          "distillation_gain_over_permuted_teacher": {
+            "mean": 0.06500000000000002,
+            "standard_deviation": 0.08933346937178696
+          },
+          "distillation_gain_over_unaligned": {
+            "mean": 0.06624999999999999,
+            "standard_deviation": 0.05136800438989239
+          }
+        }
+      },
+      "decision_match": {
+        "decision_space_distillation": {
+          "in_distribution": {
+            "centered_logit_mse": {
+              "mean": 5.749820561462205,
+              "standard_deviation": 2.6631163610531607
+            },
+            "kl_divergence": {
+              "mean": 0.22125619878193561,
+              "standard_deviation": 0.0558717263372095
+            },
+            "probability_correlation": {
+              "mean": 0.8533342494266538,
+              "standard_deviation": 0.011468649853800266
+            },
+            "top_choice_agreement": {
+              "mean": 0.816875,
+              "standard_deviation": 0.023447914352880083
+            }
+          },
+          "out_of_distribution": {
+            "centered_logit_mse": {
+              "mean": 24.632689700675346,
+              "standard_deviation": 17.395023190316227
+            },
+            "kl_divergence": {
+              "mean": 1.2561672361093952,
+              "standard_deviation": 0.44145141104792884
+            },
+            "probability_correlation": {
+              "mean": 0.31145560176577114,
+              "standard_deviation": 0.05372432101590863
+            },
+            "top_choice_agreement": {
+              "mean": 0.62375,
+              "standard_deviation": 0.015718470424949116
+            }
+          },
+          "train": {
+            "centered_logit_mse": {
+              "mean": 4.552618582810538,
+              "standard_deviation": 2.080684511464479
+            },
+            "kl_divergence": {
+              "mean": 0.15193146662799706,
+              "standard_deviation": 0.031550699976278684
+            },
+            "probability_correlation": {
+              "mean": 0.8941662315746387,
+              "standard_deviation": 0.00984949496260468
+            },
+            "top_choice_agreement": {
+              "mean": 0.85109375,
+              "standard_deviation": 0.012211014974962157
+            }
+          }
+        },
+        "native_target": {
+          "in_distribution": {
+            "centered_logit_mse": {
+              "mean": 10.505923821651866,
+              "standard_deviation": 2.88947487782682
+            },
+            "kl_divergence": {
+              "mean": 0.35741581723469606,
+              "standard_deviation": 0.058846752124534385
+            },
+            "probability_correlation": {
+              "mean": 0.8444880508046602,
+              "standard_deviation": 0.016754170522710013
+            },
+            "top_choice_agreement": {
+              "mean": 0.825625,
+              "standard_deviation": 0.013007284617667135
+            }
+          },
+          "out_of_distribution": {
+            "centered_logit_mse": {
+              "mean": 38.92624577854317,
+              "standard_deviation": 14.027957742993602
+            },
+            "kl_divergence": {
+              "mean": 1.7632515082747704,
+              "standard_deviation": 0.347881578163221
+            },
+            "probability_correlation": {
+              "mean": 0.3030216889028915,
+              "standard_deviation": 0.05499426736627622
+            },
+            "top_choice_agreement": {
+              "mean": 0.625,
+              "standard_deviation": 0.013441133229754114
+            }
+          },
+          "train": {
+            "centered_logit_mse": {
+              "mean": 9.639076177793413,
+              "standard_deviation": 2.954136741354972
+            },
+            "kl_divergence": {
+              "mean": 0.28321533145147443,
+              "standard_deviation": 0.05198449256929582
+            },
+            "probability_correlation": {
+              "mean": 0.8699731760127458,
+              "standard_deviation": 0.01902605667106597
+            },
+            "top_choice_agreement": {
+              "mean": 0.84140625,
+              "standard_deviation": 0.020009763241977667
+            }
+          }
+        },
+        "permuted_teacher_distillation": {
+          "in_distribution": {
+            "centered_logit_mse": {
+              "mean": 17.219646788384956,
+              "standard_deviation": 6.406741844756933
+            },
+            "kl_divergence": {
+              "mean": 0.6379316957539414,
+              "standard_deviation": 0.08321461416794922
+            },
+            "probability_correlation": {
+              "mean": 0.3409660430473398,
+              "standard_deviation": 0.033400749632910315
+            },
+            "top_choice_agreement": {
+              "mean": 0.4278125,
+              "standard_deviation": 0.047552397087318315
+            }
+          },
+          "out_of_distribution": {
+            "centered_logit_mse": {
+              "mean": 4.7682448630428915,
+              "standard_deviation": 1.3953569883385555
+            },
+            "kl_divergence": {
+              "mean": 0.2639204686321318,
+              "standard_deviation": 0.03790172790571513
+            },
+            "probability_correlation": {
+              "mean": 0.11323621959453276,
+              "standard_deviation": 0.14420017460079199
+            },
+            "top_choice_agreement": {
+              "mean": 0.55,
+              "standard_deviation": 0.10329058675649005
+            }
+          },
+          "train": {
+            "centered_logit_mse": {
+              "mean": 16.687931144579004,
+              "standard_deviation": 5.867430861885511
+            },
+            "kl_divergence": {
+              "mean": 0.6213640550721903,
+              "standard_deviation": 0.0763832193185805
+            },
+            "probability_correlation": {
+              "mean": 0.3677530785836456,
+              "standard_deviation": 0.04156833050803383
+            },
+            "top_choice_agreement": {
+              "mean": 0.45109375,
+              "standard_deviation": 0.03937996000505839
+            }
+          }
+        },
+        "random_head_control": {
+          "in_distribution": {
+            "centered_logit_mse": {
+              "mean": 9.123463550878435,
+              "standard_deviation": 4.043336465069113
+            },
+            "kl_divergence": {
+              "mean": 0.2706294854858424,
+              "standard_deviation": 0.02320082114158136
+            },
+            "probability_correlation": {
+              "mean": 0.8077839492896915,
+              "standard_deviation": 0.02194427562452713
+            },
+            "top_choice_agreement": {
+              "mean": 0.803125,
+              "standard_deviation": 0.0072450144496060435
+            }
+          },
+          "out_of_distribution": {
+            "centered_logit_mse": {
+              "mean": 10.113468141379682,
+              "standard_deviation": 2.228621667797177
+            },
+            "kl_divergence": {
+              "mean": 0.6818696120477398,
+              "standard_deviation": 0.13373194882072276
+            },
+            "probability_correlation": {
+              "mean": 0.28901996171737065,
+              "standard_deviation": 0.057812472579768404
+            },
+            "top_choice_agreement": {
+              "mean": 0.62,
+              "standard_deviation": 0.015084397982683937
+            }
+          },
+          "train": {
+            "centered_logit_mse": {
+              "mean": 8.119158542484552,
+              "standard_deviation": 3.6237509077378856
+            },
+            "kl_divergence": {
+              "mean": 0.21787676138266762,
+              "standard_deviation": 0.03259936477094749
+            },
+            "probability_correlation": {
+              "mean": 0.8487727327602517,
+              "standard_deviation": 0.028378444981792563
+            },
+            "top_choice_agreement": {
+              "mean": 0.83796875,
+              "standard_deviation": 0.025666173096241897
+            }
+          }
+        },
+        "supervised_transfer_target": {
+          "in_distribution": {
+            "centered_logit_mse": {
+              "mean": 10.084166412216742,
+              "standard_deviation": 1.1663093676741367
+            },
+            "kl_divergence": {
+              "mean": 0.36621386510707,
+              "standard_deviation": 0.02621308078688092
+            },
+            "probability_correlation": {
+              "mean": 0.8352344614998076,
+              "standard_deviation": 0.014875061729137209
+            },
+            "top_choice_agreement": {
+              "mean": 0.8159375,
+              "standard_deviation": 0.008515266620899192
+            }
+          },
+          "out_of_distribution": {
+            "centered_logit_mse": {
+              "mean": 35.005421956828066,
+              "standard_deviation": 3.592456648689815
+            },
+            "kl_divergence": {
+              "mean": 1.6867584604352306,
+              "standard_deviation": 0.05728491199969768
+            },
+            "probability_correlation": {
+              "mean": 0.29586639397466125,
+              "standard_deviation": 0.05592548712159501
+            },
+            "top_choice_agreement": {
+              "mean": 0.623125,
+              "standard_deviation": 0.012997896464428407
+            }
+          },
+          "train": {
+            "centered_logit_mse": {
+              "mean": 9.08481015337759,
+              "standard_deviation": 1.2233704163500871
+            },
+            "kl_divergence": {
+              "mean": 0.2862491916947988,
+              "standard_deviation": 0.02562542094087054
+            },
+            "probability_correlation": {
+              "mean": 0.8684114021010129,
+              "standard_deviation": 0.014741708797055327
+            },
+            "top_choice_agreement": {
+              "mean": 0.84234375,
+              "standard_deviation": 0.015142954864597937
+            }
+          }
+        },
+        "unaligned_target": {
+          "in_distribution": {
+            "centered_logit_mse": {
+              "mean": 18.20449115995892,
+              "standard_deviation": 7.518713408714521
+            },
+            "kl_divergence": {
+              "mean": 0.6396772895450704,
+              "standard_deviation": 0.07690976940761411
+            },
+            "probability_correlation": {
+              "mean": 0.31824291494362894,
+              "standard_deviation": 0.02579614575328281
+            },
+            "top_choice_agreement": {
+              "mean": 0.4190625,
+              "standard_deviation": 0.055610514265514575
+            }
+          },
+          "out_of_distribution": {
+            "centered_logit_mse": {
+              "mean": 4.788088997565716,
+              "standard_deviation": 1.4493805140621752
+            },
+            "kl_divergence": {
+              "mean": 0.2625852990150452,
+              "standard_deviation": 0.04229099183172657
+            },
+            "probability_correlation": {
+              "mean": 0.11430382502204792,
+              "standard_deviation": 0.15271956863707847
+            },
+            "top_choice_agreement": {
+              "mean": 0.54125,
+              "standard_deviation": 0.07062085164807914
+            }
+          },
+          "train": {
+            "centered_logit_mse": {
+              "mean": 17.751264764185315,
+              "standard_deviation": 6.92569141408164
+            },
+            "kl_divergence": {
+              "mean": 0.6411192839045543,
+              "standard_deviation": 0.08074312042386825
+            },
+            "probability_correlation": {
+              "mean": 0.31183138356947776,
+              "standard_deviation": 0.03467850698599894
+            },
+            "top_choice_agreement": {
+              "mean": 0.395625,
+              "standard_deviation": 0.080844465714845
+            }
+          }
+        }
+      },
+      "metrics": {
+        "decision_space_distillation": {
+          "in_distribution": {
+            "accuracy": {
+              "mean": 0.7828125,
+              "standard_deviation": 0.017258376589355088
+            },
+            "brier": {
+              "mean": 0.3378793987079381,
+              "standard_deviation": 0.03903175247206177
+            },
+            "dpr_vs_native_target": {
+              "mean": 0.9467617045461454,
+              "standard_deviation": 0.01905211628902454
+            },
+            "ece": {
+              "mean": 0.11238925963640212,
+              "standard_deviation": 0.03739815100992926
+            },
+            "macro_f1": {
+              "mean": 0.7975060904807292,
+              "standard_deviation": 0.015992061848688358
+            },
+            "nll": {
+              "mean": 0.7304319542831741,
+              "standard_deviation": 0.2679540056070172
+            },
+            "option_permutation_robustness": {
+              "mean": 1.0,
+              "standard_deviation": 0.0
+            }
+          },
+          "out_of_distribution": {
+            "accuracy": {
+              "mean": 0.60125,
+              "standard_deviation": 0.0017116329922036684
+            },
+            "brier": {
+              "mean": 0.7749032231406406,
+              "standard_deviation": 0.007131266896202323
+            },
+            "dpr_vs_native_target": {
+              "mean": 0.9877235969724923,
+              "standard_deviation": 0.008528057673263026
+            },
+            "ece": {
+              "mean": 0.3883351521193981,
+              "standard_deviation": 0.004535264327686496
+            },
+            "macro_f1": {
+              "mean": 0.3827155842364882,
+              "standard_deviation": 0.0007031013451647163
+            },
+            "nll": {
+              "mean": 3.3317587537389124,
+              "standard_deviation": 1.0747923840450815
+            },
+            "option_permutation_robustness": {
+              "mean": 1.0,
+              "standard_deviation": 0.0
+            }
+          }
+        },
+        "native_target": {
+          "in_distribution": {
+            "accuracy": {
+              "mean": 0.826875,
+              "standard_deviation": 0.011817294000743135
+            },
+            "brier": {
+              "mean": 0.2808981422944632,
+              "standard_deviation": 0.015917875865539322
+            },
+            "dpr_vs_native_target": {
+              "mean": 1.0,
+              "standard_deviation": 0.0
+            },
+            "ece": {
+              "mean": 0.11104798888787627,
+              "standard_deviation": 0.007015952112358176
+            },
+            "macro_f1": {
+              "mean": 0.8296110412541176,
+              "standard_deviation": 0.012857161244729642
+            },
+            "nll": {
+              "mean": 0.6860765768684982,
+              "standard_deviation": 0.03304153617435946
+            },
+            "option_permutation_robustness": {
+              "mean": 1.0,
+              "standard_deviation": 0.0
+            }
+          },
+          "out_of_distribution": {
+            "accuracy": {
+              "mean": 0.60875,
+              "standard_deviation": 0.004074501503251675
+            },
+            "brier": {
+              "mean": 0.7660778547234611,
+              "standard_deviation": 0.006863831807678496
+            },
+            "dpr_vs_native_target": {
+              "mean": 1.0,
+              "standard_deviation": 0.0
+            },
+            "ece": {
+              "mean": 0.3817075764387846,
+              "standard_deviation": 0.004619403942380395
+            },
+            "macro_f1": {
+              "mean": 0.39565995138842586,
+              "standard_deviation": 0.009508180561372315
+            },
+            "nll": {
+              "mean": 4.320343608570093,
+              "standard_deviation": 0.678552982474987
+            },
+            "option_permutation_robustness": {
+              "mean": 1.0,
+              "standard_deviation": 0.0
+            }
+          }
+        },
+        "permuted_teacher_distillation": {
+          "in_distribution": {
+            "accuracy": {
+              "mean": 0.37125,
+              "standard_deviation": 0.013007284617667134
+            },
+            "brier": {
+              "mean": 0.7195270937004623,
+              "standard_deviation": 0.10803428362497809
+            },
+            "dpr_vs_native_target": {
+              "mean": 0.44894057983757685,
+              "standard_deviation": 0.012825676450175736
+            },
+            "ece": {
+              "mean": 0.18490329425781965,
+              "standard_deviation": 0.11226561443905417
+            },
+            "macro_f1": {
+              "mean": 0.21280696171261762,
+              "standard_deviation": 0.021133392576085062
+            },
+            "nll": {
+              "mean": 1.208587440684479,
+              "standard_deviation": 0.225151175424774
+            },
+            "option_permutation_robustness": {
+              "mean": 1.0,
+              "standard_deviation": 0.0
+            }
+          },
+          "out_of_distribution": {
+            "accuracy": {
+              "mean": 0.53625,
+              "standard_deviation": 0.08857046100421967
+            },
+            "brier": {
+              "mean": 0.5046434384075835,
+              "standard_deviation": 0.030073382480139667
+            },
+            "dpr_vs_native_target": {
+              "mean": 0.8805546297443098,
+              "standard_deviation": 0.14332613307973374
+            },
+            "ece": {
+              "mean": 0.07685919374227525,
+              "standard_deviation": 0.06187858012753405
+            },
+            "macro_f1": {
+              "mean": 0.3844505452475342,
+              "standard_deviation": 0.05913650524946045
+            },
+            "nll": {
+              "mean": 0.6985039246283041,
+              "standard_deviation": 0.0306767451352886
+            },
+            "option_permutation_robustness": {
+              "mean": 1.0,
+              "standard_deviation": 0.0
+            }
+          }
+        },
+        "random_head_control": {
+          "in_distribution": {
+            "accuracy": {
+              "mean": 0.80125,
+              "standard_deviation": 0.022894757519462842
+            },
+            "brier": {
+              "mean": 0.3024446748896724,
+              "standard_deviation": 0.03920586708967567
+            },
+            "dpr_vs_native_target": {
+              "mean": 0.9688579102026106,
+              "standard_deviation": 0.014531995359797097
+            },
+            "ece": {
+              "mean": 0.06495807100087404,
+              "standard_deviation": 0.028073834675238878
+            },
+            "macro_f1": {
+              "mean": 0.8086312942483891,
+              "standard_deviation": 0.02284639355450779
+            },
+            "nll": {
+              "mean": 0.563240703348193,
+              "standard_deviation": 0.09855379279760679
+            },
+            "option_permutation_robustness": {
+              "mean": 1.0,
+              "standard_deviation": 0.0
+            }
+          },
+          "out_of_distribution": {
+            "accuracy": {
+              "mean": 0.60125,
+              "standard_deviation": 0.0017116329922036684
+            },
+            "brier": {
+              "mean": 0.6636997622795174,
+              "standard_deviation": 0.018383001248284028
+            },
+            "dpr_vs_native_target": {
+              "mean": 0.9877077357057059,
+              "standard_deviation": 0.005779126980573359
+            },
+            "ece": {
+              "mean": 0.28501514051109555,
+              "standard_deviation": 0.03225810817077074
+            },
+            "macro_f1": {
+              "mean": 0.3783943172681624,
+              "standard_deviation": 0.004647860337754699
+            },
+            "nll": {
+              "mean": 1.957174193844389,
+              "standard_deviation": 0.2727527842504986
+            },
+            "option_permutation_robustness": {
+              "mean": 1.0,
+              "standard_deviation": 0.0
+            }
+          }
+        },
+        "supervised_transfer_target": {
+          "in_distribution": {
+            "accuracy": {
+              "mean": 0.818125,
+              "standard_deviation": 0.011299802957352834
+            },
+            "brier": {
+              "mean": 0.2944188388346163,
+              "standard_deviation": 0.021995506149337405
+            },
+            "dpr_vs_native_target": {
+              "mean": 0.9894464152874349,
+              "standard_deviation": 0.007603718583684076
+            },
+            "ece": {
+              "mean": 0.11841389800421893,
+              "standard_deviation": 0.009617153779226971
+            },
+            "macro_f1": {
+              "mean": 0.8227565299527605,
+              "standard_deviation": 0.011289974338739229
+            },
+            "nll": {
+              "mean": 0.7273350048112603,
+              "standard_deviation": 0.08361882841118849
+            },
+            "option_permutation_robustness": {
+              "mean": 1.0,
+              "standard_deviation": 0.0
+            }
+          },
+          "out_of_distribution": {
+            "accuracy": {
+              "mean": 0.6068749999999999,
+              "standard_deviation": 0.0026145625829189834
+            },
+            "brier": {
+              "mean": 0.7621230235100782,
+              "standard_deviation": 0.0035272641892357282
+            },
+            "dpr_vs_native_target": {
+              "mean": 0.9969547455096152,
+              "standard_deviation": 0.007810897098466164
+            },
+            "ece": {
+              "mean": 0.3809565083682537,
+              "standard_deviation": 0.0024574316932515204
+            },
+            "macro_f1": {
+              "mean": 0.39070458807897324,
+              "standard_deviation": 0.0035011818448603517
+            },
+            "nll": {
+              "mean": 4.155094308913143,
+              "standard_deviation": 0.28152179339975775
+            },
+            "option_permutation_robustness": {
+              "mean": 1.0,
+              "standard_deviation": 0.0
+            }
+          }
+        },
+        "unaligned_target": {
+          "in_distribution": {
+            "accuracy": {
+              "mean": 0.4078125,
+              "standard_deviation": 0.0169370963974053
+            },
+            "brier": {
+              "mean": 0.6248916950671184,
+              "standard_deviation": 0.006571891679648083
+            },
+            "dpr_vs_native_target": {
+              "mean": 0.49337802859256996,
+              "standard_deviation": 0.024281898327929104
+            },
+            "ece": {
+              "mean": 0.04827304433099927,
+              "standard_deviation": 0.028926120807089544
+            },
+            "macro_f1": {
+              "mean": 0.2747431876248354,
+              "standard_deviation": 0.0425171626671213
+            },
+            "nll": {
+              "mean": 1.037921736991117,
+              "standard_deviation": 0.009485964007769968
+            },
+            "option_permutation_robustness": {
+              "mean": 1.0,
+              "standard_deviation": 0.0
+            }
+          },
+          "out_of_distribution": {
+            "accuracy": {
+              "mean": 0.535,
+              "standard_deviation": 0.050746382260216376
+            },
+            "brier": {
+              "mean": 0.4965344191923809,
+              "standard_deviation": 0.009490116157629224
+            },
+            "dpr_vs_native_target": {
+              "mean": 0.87868425138748,
+              "standard_deviation": 0.08091211827121993
+            },
+            "ece": {
+              "mean": 0.0390584557130933,
+              "standard_deviation": 0.016911906027792648
+            },
+            "macro_f1": {
+              "mean": 0.4645863106672795,
+              "standard_deviation": 0.03440886588137093
+            },
+            "nll": {
+              "mean": 0.6896868822144616,
+              "standard_deviation": 0.009544797485514352
+            },
+            "option_permutation_robustness": {
+              "mean": 1.0,
+              "standard_deviation": 0.0
+            }
+          }
+        }
+      },
+      "model_id": "HuggingFaceTB/SmolLM2-360M-Instruct"
+    }
+  }
+}

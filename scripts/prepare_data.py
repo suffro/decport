@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
+import json
 import random
 from pathlib import Path
 
@@ -17,6 +19,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--eval-per-family", type=int, default=500)
     parser.add_argument("--ood", type=int, default=500)
     parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument(
+        "--manifest",
+        default="data_manifest.json",
+        help="Manifest filename written inside the output directory",
+    )
     return parser.parse_args()
 
 
@@ -61,15 +68,115 @@ def main() -> None:
     rng = random.Random(args.seed)
     rng.shuffle(train_examples)
     rng.shuffle(eval_examples)
+    _assert_disjoint(train_examples, eval_examples, ood_examples)
     output = Path(args.output)
-    write_jsonl(train_examples, output / "train.jsonl")
-    write_jsonl(eval_examples, output / "eval.jsonl")
-    write_jsonl(ood_examples, output / "ood_boolq.jsonl")
+    paths = {
+        "train": output / "train.jsonl",
+        "eval": output / "eval.jsonl",
+        "ood_boolq": output / "ood_boolq.jsonl",
+    }
+    write_jsonl(train_examples, paths["train"])
+    write_jsonl(eval_examples, paths["eval"])
+    write_jsonl(ood_examples, paths["ood_boolq"])
+    manifest = {
+        "preparation": {
+            "script": "scripts/prepare_data.py",
+            "seed": args.seed,
+            "train_per_family": args.train_per_family,
+            "eval_per_family": args.eval_per_family,
+            "ood": args.ood,
+            "exact_record_overlap_across_splits": 0,
+        },
+        "splits": {
+            "train": {
+                "count": len(train_examples),
+                "sha256": _sha256(paths["train"]),
+                "families": {
+                    "sst2": {
+                        "count": len(train),
+                        "dataset": "nyu-mll/glue",
+                        "dataset_config": "sst2",
+                        "split": "train",
+                        "fingerprint": train._fingerprint,
+                    },
+                    "ag_news": {
+                        "count": len(ag_train),
+                        "dataset": "fancyzhx/ag_news",
+                        "split": "train",
+                        "fingerprint": ag_train._fingerprint,
+                    },
+                },
+            },
+            "eval": {
+                "count": len(eval_examples),
+                "sha256": _sha256(paths["eval"]),
+                "families": {
+                    "sst2": {
+                        "count": len(validation),
+                        "dataset": "nyu-mll/glue",
+                        "dataset_config": "sst2",
+                        "split": "validation",
+                        "fingerprint": validation._fingerprint,
+                    },
+                    "ag_news": {
+                        "count": len(ag_test),
+                        "dataset": "fancyzhx/ag_news",
+                        "split": "test",
+                        "fingerprint": ag_test._fingerprint,
+                    },
+                },
+            },
+            "ood_boolq": {
+                "count": len(ood_examples),
+                "sha256": _sha256(paths["ood_boolq"]),
+                "dataset": "google/boolq",
+                "split": "validation",
+                "fingerprint": boolq._fingerprint,
+            },
+        },
+    }
+    (output / args.manifest).write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
 
 
 def _take(dataset, count: int, seed: int):
     shuffled = dataset.shuffle(seed=seed)
     return shuffled.select(range(min(count, len(shuffled))))
+
+
+def _assert_disjoint(*splits) -> None:
+    signatures = []
+    for examples in splits:
+        current = {
+            hashlib.sha256(
+                json.dumps(
+                    {
+                        "state": example.state,
+                        "question": example.question,
+                        "options": sorted(example.options),
+                    },
+                    ensure_ascii=False,
+                    sort_keys=True,
+                ).encode("utf-8")
+            ).hexdigest()
+            for example in examples
+        }
+        if len(current) != len(examples):
+            raise ValueError("a prepared split contains duplicate decision records")
+        signatures.append(current)
+    for left_index, left in enumerate(signatures):
+        for right in signatures[left_index + 1 :]:
+            if left.intersection(right):
+                raise ValueError("prepared train/eval/OOD splits overlap")
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 if __name__ == "__main__":
