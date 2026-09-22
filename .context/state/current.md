@@ -43,14 +43,23 @@ The smallest credible v0.1 implementation and reproducible cross-backbone experi
   loss without improving frozen-head accuracy. No method materially exceeded the current result,
   so this remains negative diagnostic evidence rather than a portability claim. Results are under
   `benchmarks/diagnostics/v0.1/2026-09-21-wsl2-rtx4060ti-label-free-methods-seed0/`.
+- Ran a three-seed, five-epoch label-free decision-space distillation diagnostic on the unchanged
+  128/64/32 slices. Correct teacher distillation reached 0.6615 ± 0.0549 mean ID accuracy, versus
+  0.3802 ± 0.0477 for cosine-plus-MSE latent alignment, 0.3229 ± 0.0180 for deterministic
+  permuted-teacher distillation, and 0.3438 ± 0.0563 unaligned. The +0.3385 ± 0.0705 gain over the
+  permuted control is evidence that input-specific Qwen decision behavior was transferred on this
+  bounded ID diagnostic. BoolQ OOD gains were small and calibration worsened, so this is not a
+  general portability claim. Results are under
+  `benchmarks/diagnostics/v0.1/2026-09-22-wsl2-rtx4060ti-decision-distillation-seeds0-2/`.
 
 ## Next
 
 - Run a larger-data, independently reproduced multi-seed experiment before making portability
   claims; the bounded convergence diagnostic did not show a persistent transfer-over-random gain.
-- If latent alignment is pursued further, first test multiple seeds or stronger label-free
-  objectives targeted at head-relevant geometry; whitening, ridge, and Procrustes did not improve
-  the ID cosine-plus-MSE result or beat the ID random control.
+- Treat decision-space distillation as the leading bounded label-free method, but investigate its
+  poor BoolQ NLL/ECE and validate on larger data before any portability claim.
+- Do not prioritize further global latent matching without a new head-relevant hypothesis;
+  whitening, ridge, and Procrustes did not improve the existing baseline.
 - Commit benchmark results only after a reproducibility run.
 
 ## Blockers

@@ -20,6 +20,10 @@ SmolLM2-360M-Instruct is the first target model.
 - `src/decport/alignment.py`: label-free iterative, whitened, ridge, and Procrustes matching with a
   hard no-answer guard.
 - `src/decport/alignment_experiment.py`: bounded source/native/transfer/control/alignment diagnostic.
+- `src/decport/distillation.py`: label-free teacher-output collection, decision-space distillation,
+  deterministic permuted-teacher control, and teacher/student behavior metrics.
+- `scripts/run_distillation_experiment.py`: controlled multi-seed distillation diagnostic and
+  aggregate summary.
 
 ## Data flow
 
@@ -45,6 +49,11 @@ the runtime option set.
 - Alignment inputs must have no `answer`, and the alignment trainer never invokes a decision head.
 - Closed-form ridge and Procrustes maps are folded into the target adapter's final linear layer, so
   aligned artifacts retain the standard adapter-to-frozen-head inference path.
+- Label-free decision distillation caches detached Qwen candidate scores, uses no answer fields or
+  labeled loss, and optimizes only a matched-initialization SmolLM adapter through the unchanged
+  frozen Qwen head.
+- Direct logit matching is invariant to arbitrary per-decision offsets because logits are centered
+  before MSE. The KL term uses temperature-softened candidate distributions.
 - Both backbones use the same textual decision prompt.
 - Candidate order is shuffled during training and explicitly tested during evaluation.
 - Smoke-test metrics are not benchmark evidence.

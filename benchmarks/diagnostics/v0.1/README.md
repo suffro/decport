@@ -22,3 +22,10 @@ The follow-up
 the 0.4219 baseline, while ridge and Procrustes reached 0.4062 and source-whitened matching reached
 0.2969. No stronger method recovered more frozen-head decision capability on the bounded seed-0
 run.
+
+The three-seed
+[`decision-space distillation diagnostic`](2026-09-22-wsl2-rtx4060ti-decision-distillation-seeds0-2/)
+directly matched frozen Qwen candidate distributions. Correct distillation reached 0.6615 ± 0.0549
+ID accuracy and exceeded the permuted-teacher control by +0.3385 ± 0.0705. BoolQ OOD accuracy gains
+were small and calibration degraded, so the result is diagnostic evidence rather than a general
+portability claim.

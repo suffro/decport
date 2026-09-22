@@ -98,6 +98,13 @@ A bounded follow-up compared whitening, ridge, and orthogonal Procrustes against
 baseline. None exceeded 0.4219 ID accuracy; see the
 [`stronger-method diagnostic`](benchmarks/diagnostics/v0.1/2026-09-21-wsl2-rtx4060ti-label-free-methods-seed0/).
 
+A three-seed
+[`decision-space distillation diagnostic`](benchmarks/diagnostics/v0.1/2026-09-22-wsl2-rtx4060ti-decision-distillation-seeds0-2/)
+then trained only the SmolLM adapter against frozen Qwen candidate distributions. Mean ID accuracy
+was 0.6615 ± 0.0549, compared with 0.3802 ± 0.0477 for latent alignment and 0.3229 ± 0.0180 for a
+permuted-teacher control. This is positive bounded evidence for transferring input-specific decision
+behavior, but weak OOD gains and degraded calibration preclude a general portability claim.
+
 | Backbone | Head | Trainable component | Accuracy | Brier | ECE | Portability Ratio |
 |---|---|---|---:|---:|---:|---:|
 | Qwen3-0.6B | shared/source | adapter + head | pending | pending | pending | — |

@@ -1,8 +1,9 @@
-"""Bounded label-free cross-backbone alignment diagnostic."""
+"""Bounded label-free cross-backbone alignment and distillation diagnostics."""
 
 from __future__ import annotations
 
 import json
+import statistics
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
@@ -20,6 +21,13 @@ from decport.alignment import (
 )
 from decport.backbones import QwenBackbone, SmolLMBackbone
 from decport.data import load_jsonl
+from decport.distillation import (
+    DistillationConfig,
+    collect_teacher_outputs,
+    measure_decision_match,
+    permute_teacher_outputs,
+    train_decision_distillation,
+)
 from decport.eval import evaluate
 from decport.experiment import resolve_device
 from decport.head import DecisionHead
@@ -44,6 +52,7 @@ class AlignmentExperimentConfig:
     decision_training: TrainingConfig = field(default_factory=TrainingConfig)
     alignment_training: AlignmentConfig = field(default_factory=AlignmentConfig)
     alignment_methods: tuple[str, ...] = ("cosine_mse",)
+    distillation_training: DistillationConfig | None = None
 
 
 def run_alignment_experiment(
@@ -55,6 +64,11 @@ def run_alignment_experiment(
         raise ValueError("shared_size must be positive")
     if config.decision_training.seed != config.alignment_training.seed:
         raise ValueError("decision and alignment seeds must match")
+    if (
+        config.distillation_training is not None
+        and config.decision_training.seed != config.distillation_training.seed
+    ):
+        raise ValueError("decision and distillation seeds must match")
     if not config.alignment_methods or len(set(config.alignment_methods)) != len(
         config.alignment_methods
     ):
@@ -100,6 +114,11 @@ def run_alignment_experiment(
     source_model.requires_grad_(False)
     source_model.eval()
     source_head_state = _state_copy(source_model.head)
+    teacher_outputs = (
+        collect_teacher_outputs(source_model, unlabeled_inputs)
+        if config.distillation_training is not None
+        else None
+    )
 
     target_backbone = SmolLMBackbone.from_pretrained(
         config.smollm_model_id,
@@ -120,6 +139,16 @@ def run_alignment_experiment(
     )
     unaligned_alignment = measure_latent_alignment(
         source_model, unaligned_model, unlabeled_inputs, config.alignment_training
+    )
+    unaligned_decision_match = (
+        measure_decision_match(
+            unaligned_model,
+            unlabeled_inputs,
+            teacher_outputs,
+            config.distillation_training,
+        )
+        if teacher_outputs is not None and config.distillation_training is not None
+        else None
     )
     save_artifact(
         unaligned_model,
@@ -254,6 +283,79 @@ def run_alignment_experiment(
             "artifact": artifact_name,
         }
 
+    distillation_results: dict[str, dict[str, object]] = {}
+    distilled_metrics_by_method: dict[str, dict[str, object]] = {}
+    if config.distillation_training is not None:
+        if teacher_outputs is None:
+            raise RuntimeError("teacher outputs were not collected")
+        permuted_outputs = permute_teacher_outputs(
+            unlabeled_inputs,
+            teacher_outputs,
+            seed=config.distillation_training.seed,
+        )
+        for condition, outputs in (
+            ("decision_space_distillation", teacher_outputs),
+            ("permuted_teacher_distillation", permuted_outputs),
+        ):
+            distilled_model = _target_model(
+                target_backbone,
+                initial_adapter_state,
+                source_head_state,
+                config.shared_size,
+                device,
+            )
+            distilled_head_before = _state_copy(distilled_model.head)
+            history = train_decision_distillation(
+                source_model,
+                distilled_model,
+                unlabeled_inputs,
+                outputs,
+                config.distillation_training,
+            )
+            _assert_state_unchanged(
+                source_frozen_before["adapter"], source_model.adapter
+            )
+            _assert_state_unchanged(source_frozen_before["head"], source_model.head)
+            _assert_state_unchanged(distilled_head_before, distilled_model.head)
+            correct_teacher_match = measure_decision_match(
+                distilled_model,
+                unlabeled_inputs,
+                teacher_outputs,
+                config.distillation_training,
+            )
+            objective_teacher_match = measure_decision_match(
+                distilled_model,
+                unlabeled_inputs,
+                outputs,
+                config.distillation_training,
+            )
+            metrics = _evaluate_all(
+                distilled_model, eval_examples, ood_examples, config
+            )
+            save_artifact(
+                distilled_model,
+                output_dir / condition,
+                include_head=False,
+                metadata={
+                    "role": condition,
+                    "head": "source/head.safetensors",
+                    "decision_labels_used_for_adapter": "false",
+                    "teacher_outputs": (
+                        "matched" if condition == "decision_space_distillation" else "permuted"
+                    ),
+                },
+            )
+            distilled_metrics_by_method[condition] = metrics
+            distillation_results[condition] = {
+                "training": {
+                    "epoch_metrics": [asdict(epoch) for epoch in history.epochs]
+                },
+                "correct_teacher_match": asdict(correct_teacher_match),
+                "objective_teacher_match": asdict(objective_teacher_match),
+                "metrics": metrics,
+                "artifact": condition,
+            }
+
     reference_conditions = {
         "source": source_metrics,
         "native_target": native_metrics,
@@ -284,11 +386,42 @@ def run_alignment_experiment(
                     f"{_alignment_artifact_name(method)}.decision_head"
                     for method in config.alignment_methods
                 ],
+                *(
+                    [
+                        "decision_space_distillation.decision_head",
+                        "permuted_teacher_distillation.decision_head",
+                    ]
+                    if config.distillation_training is not None
+                    else []
+                ),
             ],
             "decision_loss_used": False,
             "decision_heads_called_by_alignment": False,
             "matched_target_adapter_initialization": True,
             "source_and_head_state_verified_unchanged": True,
+            "distillation_examples": (
+                len(unlabeled_inputs) if config.distillation_training is not None else 0
+            ),
+            "distillation_examples_with_answers": (
+                sum(example.answer is not None for example in unlabeled_inputs)
+                if config.distillation_training is not None
+                else 0
+            ),
+            "distillation_decision_loss_used": False,
+            "distillation_labels_used_for_early_stopping_or_selection": False,
+            "distillation_teacher_outputs_detached": (
+                all(not output.scores.requires_grad for output in teacher_outputs)
+                if teacher_outputs is not None
+                else None
+            ),
+            "distillation_optimized_components": (
+                [
+                    "decision_space_distillation.adapter",
+                    "permuted_teacher_distillation.adapter",
+                ]
+                if config.distillation_training is not None
+                else []
+            ),
         },
         "source": {
             "training": {"epoch_losses": list(source_history.epoch_losses)},
@@ -308,13 +441,40 @@ def run_alignment_experiment(
         },
         "unaligned_target": {
             "raw_alignment": asdict(unaligned_alignment),
+            "decision_match": (
+                asdict(unaligned_decision_match)
+                if unaligned_decision_match is not None
+                else None
+            ),
             "metrics": unaligned_metrics,
         },
         "alignment_methods": alignment_results,
         # Backward-compatible alias for the original baseline condition.
         "label_free_aligned_target": baseline_result,
+        "distillation_conditions": distillation_results,
+        "distillation_objective": (
+            {
+                "formula": (
+                    "temperature^2 * KL(softmax(teacher/temperature) || "
+                    "softmax(student/temperature)) + centered_logit_mse_weight * "
+                    "MSE(student_logits - mean(student_logits), teacher_logits - "
+                    "mean(teacher_logits))"
+                ),
+                "temperature": config.distillation_training.temperature,
+                "centered_logit_mse_weight": (
+                    config.distillation_training.centered_logit_mse_weight
+                ),
+                "permuted_teacher": (
+                    "seeded cyclic derangement within equal candidate-count groups"
+                ),
+            }
+            if config.distillation_training is not None
+            else None
+        ),
         "comparisons": _comparisons(
-            reference_conditions, aligned_metrics_by_method
+            reference_conditions,
+            aligned_metrics_by_method,
+            distilled_metrics_by_method,
         ),
         "adapter_size_bytes": adapter_sizes,
         "alignment_trainable_parameters": sum(
@@ -325,6 +485,157 @@ def run_alignment_experiment(
         json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     return result
+
+
+def aggregate_distillation_results(
+    results: list[dict[str, object]],
+) -> dict[str, object]:
+    """Aggregate the requested three-seed diagnostic with sample deviations."""
+
+    if not results:
+        raise ValueError("at least one experiment result is required")
+    seeds = [int(result["config"]["decision_training"]["seed"]) for result in results]  # type: ignore[index]
+    conditions = (
+        "source",
+        "native_target",
+        "supervised_transfer_target",
+        "random_head_control",
+        "unaligned_target",
+    )
+    aggregate: dict[str, object] = {
+        "status": "diagnostic_not_accepted_benchmark",
+        "seeds": seeds,
+        "seed_count": len(seeds),
+        "standard_deviation": "sample (n-1)",
+        "metrics": {},
+        "decision_match": {},
+        "training": {},
+        "comparisons": {},
+    }
+    metric_conditions: dict[str, list[dict[str, object]]] = {
+        condition: [result[condition] for result in results]  # type: ignore[list-item]
+        for condition in conditions
+    }
+    metric_conditions["latent_alignment"] = [
+        result["alignment_methods"]["cosine_mse"] for result in results  # type: ignore[index]
+    ]
+    for condition in (
+        "decision_space_distillation",
+        "permuted_teacher_distillation",
+    ):
+        metric_conditions[condition] = [
+            result["distillation_conditions"][condition] for result in results  # type: ignore[index]
+        ]
+
+    aggregate_metrics = aggregate["metrics"]
+    assert isinstance(aggregate_metrics, dict)
+    metric_names = (
+        "accuracy",
+        "macro_f1",
+        "nll",
+        "brier",
+        "ece",
+        "option_permutation_robustness",
+    )
+    splits = tuple(results[0]["native_target"]["metrics"])  # type: ignore[index]
+    for condition, entries in metric_conditions.items():
+        aggregate_metrics[condition] = {}
+        for split in splits:
+            split_metrics = {
+                metric: _mean_and_std(
+                    [float(entry["metrics"][split][metric]) for entry in entries]  # type: ignore[index]
+                )
+                for metric in metric_names
+            }
+            native_accuracies = [
+                float(result["native_target"]["metrics"][split]["accuracy"])  # type: ignore[index]
+                for result in results
+            ]
+            accuracies = [
+                float(entry["metrics"][split]["accuracy"]) for entry in entries  # type: ignore[index]
+            ]
+            split_metrics["dpr_vs_native_smollm"] = _mean_and_std(
+                [
+                    accuracy / native if native > 0 else 0.0
+                    for accuracy, native in zip(
+                        accuracies, native_accuracies, strict=True
+                    )
+                ]
+            )
+            aggregate_metrics[condition][split] = split_metrics
+
+    aggregate_match = aggregate["decision_match"]
+    assert isinstance(aggregate_match, dict)
+    match_conditions = {
+        "unaligned_target": [
+            result["unaligned_target"]["decision_match"] for result in results  # type: ignore[index]
+        ],
+        "decision_space_distillation": [
+            result["distillation_conditions"]["decision_space_distillation"][
+                "correct_teacher_match"
+            ]
+            for result in results  # type: ignore[index]
+        ],
+        "permuted_teacher_distillation": [
+            result["distillation_conditions"]["permuted_teacher_distillation"][
+                "correct_teacher_match"
+            ]
+            for result in results  # type: ignore[index]
+        ],
+    }
+    for condition, entries in match_conditions.items():
+        aggregate_match[condition] = {
+            metric: _mean_and_std([float(entry[metric]) for entry in entries])  # type: ignore[index]
+            for metric in (
+                "kl_divergence",
+                "centered_logit_mse",
+                "top_choice_agreement",
+                "probability_correlation",
+            )
+        }
+
+    aggregate_training = aggregate["training"]
+    assert isinstance(aggregate_training, dict)
+    for condition in (
+        "decision_space_distillation",
+        "permuted_teacher_distillation",
+    ):
+        curves = [
+            result["distillation_conditions"][condition]["training"][  # type: ignore[index]
+                "epoch_metrics"
+            ]
+            for result in results
+        ]
+        epoch_count = len(curves[0])
+        if any(len(curve) != epoch_count for curve in curves):
+            raise ValueError("distillation curves must have equal epoch counts")
+        aggregate_training[condition] = [
+            {
+                "epoch": epoch_index + 1,
+                **{
+                    metric: _mean_and_std(
+                        [float(curve[epoch_index][metric]) for curve in curves]
+                    )
+                    for metric in ("loss", "kl_divergence", "centered_logit_mse")
+                },
+            }
+            for epoch_index in range(epoch_count)
+        ]
+
+    aggregate_comparisons = aggregate["comparisons"]
+    assert isinstance(aggregate_comparisons, dict)
+    for split in splits:
+        aggregate_comparisons[split] = {
+            metric: _mean_and_std(
+                [float(result["comparisons"][split][metric]) for result in results]  # type: ignore[index]
+            )
+            for metric in (
+                "distillation_gain_over_unaligned",
+                "distillation_gain_over_latent_alignment",
+                "distillation_gain_over_permuted_teacher",
+            )
+        }
+    return aggregate
 
 
 def _target_model(
@@ -361,7 +672,11 @@ def _evaluate_all(model, eval_examples, ood_examples, config):
     return result
 
 
-def _comparisons(reference_conditions, aligned_metrics_by_method):
+def _comparisons(
+    reference_conditions,
+    aligned_metrics_by_method,
+    distilled_metrics_by_method,
+):
     comparisons = {}
     for split in reference_conditions["native_target"]:
         accuracy = {
@@ -386,7 +701,57 @@ def _comparisons(reference_conditions, aligned_metrics_by_method):
                 ),
             }
         baseline = method_comparisons["cosine_mse"]
+        distillation_accuracy = (
+            float(
+                distilled_metrics_by_method["decision_space_distillation"][split][
+                    "accuracy"
+                ]
+            )
+            if distilled_metrics_by_method
+            else None
+        )
+        permuted_accuracy = (
+            float(
+                distilled_metrics_by_method["permuted_teacher_distillation"][split][
+                    "accuracy"
+                ]
+            )
+            if distilled_metrics_by_method
+            else None
+        )
         comparisons[split] = {
+            "dpr_vs_native_smollm": {
+                **{
+                    name: (
+                        decision_portability_ratio(value, native_accuracy)
+                        if native_accuracy > 0
+                        else None
+                    )
+                    for name, value in accuracy.items()
+                },
+                "latent_alignment": (
+                    decision_portability_ratio(
+                        float(
+                            aligned_metrics_by_method["cosine_mse"][split][
+                                "accuracy"
+                            ]
+                        ),
+                        native_accuracy,
+                    )
+                    if native_accuracy > 0
+                    else None
+                ),
+                **(
+                    {
+                        name: decision_portability_ratio(
+                            float(metrics[split]["accuracy"]), native_accuracy
+                        )
+                        for name, metrics in distilled_metrics_by_method.items()
+                    }
+                    if native_accuracy > 0
+                    else {name: None for name in distilled_metrics_by_method}
+                ),
+            },
             "supervised_transfer_dpr": (
                 decision_portability_ratio(
                     accuracy["supervised_transfer_target"], native_accuracy
@@ -406,6 +771,27 @@ def _comparisons(reference_conditions, aligned_metrics_by_method):
                 - accuracy["random_head_control"]
             ),
             "alignment_methods": method_comparisons,
+            "distillation_dpr": (
+                decision_portability_ratio(distillation_accuracy, native_accuracy)
+                if distillation_accuracy is not None and native_accuracy > 0
+                else None
+            ),
+            "distillation_gain_over_unaligned": (
+                distillation_accuracy - accuracy["unaligned_target"]
+                if distillation_accuracy is not None
+                else None
+            ),
+            "distillation_gain_over_latent_alignment": (
+                distillation_accuracy
+                - float(aligned_metrics_by_method["cosine_mse"][split]["accuracy"])
+                if distillation_accuracy is not None
+                else None
+            ),
+            "distillation_gain_over_permuted_teacher": (
+                distillation_accuracy - permuted_accuracy
+                if distillation_accuracy is not None and permuted_accuracy is not None
+                else None
+            ),
         }
     return comparisons
 
@@ -439,7 +825,19 @@ def _config_to_dict(config):
     value["decision_training"] = asdict(config.decision_training)
     value["alignment_training"] = asdict(config.alignment_training)
     value["alignment_methods"] = list(config.alignment_methods)
+    value["distillation_training"] = (
+        asdict(config.distillation_training)
+        if config.distillation_training is not None
+        else None
+    )
     return value
+
+
+def _mean_and_std(values: list[float]) -> dict[str, float]:
+    return {
+        "mean": statistics.mean(values),
+        "standard_deviation": statistics.stdev(values) if len(values) > 1 else 0.0,
+    }
 
 
 def _seed(seed: int, device: torch.device) -> None:
