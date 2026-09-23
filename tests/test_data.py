@@ -5,7 +5,10 @@ import pytest
 
 from decport.data import (
     convert_ag_news,
+    convert_arc,
     convert_boolq,
+    convert_qnli,
+    convert_review_rating,
     convert_sst2,
     load_jsonl,
     shuffle_options,
@@ -50,6 +53,30 @@ def test_initial_dataset_converters() -> None:
     assert convert_ag_news({"text": "Markets rose.", "label": 2}).answer == "business"
     boolq = {"passage": "Water is wet.", "question": "Is it wet?", "answer": True}
     assert convert_boolq(boolq).answer == "yes"
+
+
+def test_broad_dataset_converters_preserve_decision_semantics() -> None:
+    arc = convert_arc(
+        {
+            "question": "Which conducts electricity?",
+            "choices": {"label": ["A", "B"], "text": ["copper", "rubber"]},
+            "answerKey": "A",
+        }
+    )
+    qnli = convert_qnli({"question": "Where?", "sentence": "It is in Rome.", "label": 0})
+    rating = convert_review_rating({"text": "Fine, but flawed.", "label": 2}, dataset="reviews")
+
+    assert (arc.decision_type, arc.answer) == ("choice", "copper")
+    assert (qnli.decision_type, qnli.options, qnli.answer) == (
+        "boolean",
+        ("yes", "no"),
+        "yes",
+    )
+    assert (rating.decision_type, rating.answer, rating.options[0]) == (
+        "score",
+        "3 stars",
+        "1 star",
+    )
 
 
 @pytest.mark.parametrize("label", [-1, 2, "1", True])

@@ -29,3 +29,15 @@ directly matched frozen Qwen candidate distributions. Correct distillation reach
 ID accuracy and exceeded the permuted-teacher control by +0.3385 ± 0.0705. BoolQ OOD accuracy gains
 were small and calibration degraded, so the result is diagnostic evidence rather than a general
 portability claim.
+
+The five-seed
+[`two-target scaled validation`](2026-09-23-wsl2-rtx4060ti-decision-transfer-scale-seeds0-4/)
+replicated strong ID transfer on SmolLM and Gemma over ten-times-larger SST-2/AG News slices, while
+BoolQ OOD remained weak.
+
+The first
+[`broad Jev-like validation`](2026-09-23-wsl2-rtx4060ti-jev-broad-seeds0-4/) uses 4,500 train,
+2,000 ID, and 1,500 OOD decisions, three target families, and explicit Choice, Boolean, and ordered
+Score tasks. Correct-teacher transfer beats both negative controls overall on every target and is
+strong for Choice and Score, but Boolean does not reliably beat mismatched teachers. See the run
+report for all dataset/type/backbone strata and calibration metrics.

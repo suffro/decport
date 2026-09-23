@@ -1,0 +1,20 @@
+{
+  "all_recorded_numbers_finite": true,
+  "conditions_per_target": 6,
+  "data_hashes_and_composition_verified": true,
+  "same_source_head_within_each_seed_verified": true,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "status": "passed",
+  "strict_label_free_boundary_verified": true,
+  "targets": [
+    "gemma",
+    "smollm",
+    "tinyllama"
+  ]
+}

@@ -3,8 +3,8 @@
 Port decision capabilities across frozen LLM architectures.
 
 DecPort tests whether a small decision head trained with one language model can be reused with a
-different frozen language model by training only a lightweight adapter. The initial experiment uses
-Qwen3-0.6B as the source and SmolLM2-360M-Instruct as the target.
+different frozen language model by training only a lightweight adapter. Current validation uses
+Qwen3-0.6B as source and SmolLM2-360M, Gemma 3 270M, and TinyLlama-1.1B as targets.
 
 ```text
 Qwen3-0.6B (frozen) ── Qwen adapter ──┐
@@ -12,9 +12,9 @@ Qwen3-0.6B (frozen) ── Qwen adapter ──┐
 SmolLM2-360M (frozen) ─ Smol adapter ─┘
 ```
 
-The implementation is working end to end, but there is no credible transfer benchmark yet. DecPort
-does not claim that the hypothesis has been validated until the configured experiment is run at a
-meaningful scale and its results are independently reproduced.
+The implementation is working end to end. Five-seed evidence now supports label-free transfer for
+Choice and ordered Score across three heterogeneous target families, while Boolean transfer remains
+unresolved. This is diagnostic evidence rather than a universal portability claim.
 
 ## Install and test
 
@@ -104,6 +104,13 @@ then trained only the SmolLM adapter against frozen Qwen candidate distributions
 was 0.6615 ± 0.0549, compared with 0.3802 ± 0.0477 for latent alignment and 0.3229 ± 0.0180 for a
 permuted-teacher control. This is positive bounded evidence for transferring input-specific decision
 behavior, but weak OOD gains and degraded calibration preclude a general portability claim.
+
+The
+[`broad Jev-like validation`](benchmarks/diagnostics/v0.1/2026-09-23-wsl2-rtx4060ti-jev-broad-seeds0-4/)
+uses 4,500 train, 2,000 ID, and 1,500 OOD examples across Choice, Boolean, and ordered Score, with
+five seeds and three heterogeneous targets. Correct Qwen behavior beats untrained and mismatched
+teacher controls overall for every target. Choice and Score transfer across all targets ID, and
+Score remains positive under dataset shift; Boolean does not reliably beat the mismatched control.
 
 | Backbone | Head | Trainable component | Accuracy | Brier | ECE | Portability Ratio |
 |---|---|---|---:|---:|---:|---:|

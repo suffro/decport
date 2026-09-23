@@ -1,0 +1,10 @@
+{
+  "adapter_input_size": 640,
+  "backbone_model_id": "unsloth/gemma-3-270m-it",
+  "format_version": 1,
+  "includes_head": true,
+  "metadata": {
+    "role": "native_target"
+  },
+  "shared_size": 256
+}

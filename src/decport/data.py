@@ -58,6 +58,72 @@ def shuffle_options(
         question=example.question,
         options=tuple(options),
         answer=example.answer,
+        dataset=example.dataset,
+        task_family=example.task_family,
+        decision_type=example.decision_type,
+    )
+
+
+def convert_arc(row: Mapping[str, Any], *, dataset: str = "arc_easy") -> DecisionExample:
+    """Convert an AI2 ARC/OpenBookQA-style multiple-choice row."""
+
+    choices = row.get("choices")
+    if not isinstance(choices, Mapping):
+        raise TypeError("choices must be a mapping")
+    labels = choices.get("label")
+    texts = choices.get("text")
+    if not isinstance(labels, list) or not isinstance(texts, list) or len(labels) != len(texts):
+        raise ValueError("choices must contain equally sized label and text lists")
+    if len(texts) < 2 or any(not isinstance(text, str) or not text.strip() for text in texts):
+        raise ValueError("choice texts must contain at least two non-empty strings")
+    answer_key = row.get("answerKey")
+    if not isinstance(answer_key, str) or answer_key not in labels:
+        raise ValueError("answerKey must match a choice label")
+    question_field = "question" if isinstance(row.get("question"), str) else "question_stem"
+    return DecisionExample(
+        state=_text_field(row, question_field),
+        question="Which answer choice is correct?",
+        options=tuple(texts),
+        answer=texts[labels.index(answer_key)],
+        dataset=dataset,
+        task_family="science_question_answering",
+        decision_type="choice",
+    )
+
+
+def convert_qnli(row: Mapping[str, Any]) -> DecisionExample:
+    """Convert QNLI into its explicit yes/no entailment proposition."""
+
+    label = _integer_label(row, ("yes", "no"))
+    return DecisionExample(
+        state=f"Question: {_text_field(row, 'question')}\nSentence: {_text_field(row, 'sentence')}",
+        question="Does the sentence contain the answer to the question?",
+        options=("yes", "no"),
+        answer=("yes", "no")[label],
+        dataset="qnli",
+        task_family="textual_entailment",
+        decision_type="boolean",
+    )
+
+
+def convert_review_rating(
+    row: Mapping[str, Any],
+    *,
+    dataset: str,
+    text_field: str = "text",
+) -> DecisionExample:
+    """Convert a zero-indexed five-star review dataset into an ordered decision."""
+
+    levels = ("1 star", "2 stars", "3 stars", "4 stars", "5 stars")
+    label = _integer_label(row, levels)
+    return DecisionExample(
+        state=_text_field(row, text_field),
+        question="What ordered star rating best matches this review?",
+        options=levels,
+        answer=levels[label],
+        dataset=dataset,
+        task_family="review_rating",
+        decision_type="score",
     )
 
 
@@ -98,6 +164,9 @@ def convert_boolq(row: Mapping[str, Any]) -> DecisionExample:
         question=_text_field(row, "question"),
         options=("yes", "no"),
         answer="yes" if answer else "no",
+        dataset="boolq",
+        task_family="reading_comprehension",
+        decision_type="boolean",
     )
 
 

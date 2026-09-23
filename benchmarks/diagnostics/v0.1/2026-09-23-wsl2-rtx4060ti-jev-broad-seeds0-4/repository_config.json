@@ -1,0 +1,19 @@
+{
+  "cache_batch_size": 16,
+  "centered_logit_mse_weight": 0.1,
+  "device": "cuda",
+  "epochs": 10,
+  "eval_batch_size": 32,
+  "gemma_backbone": "unsloth/gemma-3-270m-it",
+  "learning_rate": 0.001,
+  "max_length": 384,
+  "permutation_trials": 1,
+  "seeds": [0, 1, 2, 3, 4],
+  "shared_size": 256,
+  "smollm_backbone": "HuggingFaceTB/SmolLM2-360M-Instruct",
+  "source_backbone": "Qwen/Qwen3-0.6B",
+  "temperature": 2.0,
+  "tinyllama_backbone": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+  "train_batch_size": 8,
+  "weight_decay": 0.01
+}

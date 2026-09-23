@@ -1,0 +1,38 @@
+{
+  "cache_batch_size": 16,
+  "centered_logit_mse_weight": 0.1,
+  "device": "cuda",
+  "epochs": 10,
+  "eval": "data/jev-broad-v0.1/eval.jsonl",
+  "eval_batch_size": 32,
+  "fixed_across_backbones_tasks_and_seeds": true,
+  "gemma_backbone": "unsloth/gemma-3-270m-it",
+  "learning_rate": 0.001,
+  "max_length": 384,
+  "ood": "data/jev-broad-v0.1/ood.jsonl",
+  "output": "benchmarks/diagnostics/v0.1/2026-09-23-wsl2-rtx4060ti-jev-broad-seeds0-4",
+  "permutation_trials": 1,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "shared_size": 256,
+  "smollm_backbone": "HuggingFaceTB/SmolLM2-360M-Instruct",
+  "source_backbone": "Qwen/Qwen3-0.6B",
+  "target_conditions": [
+    "untrained_target_adapter",
+    "decision_space_distillation",
+    "mismatched_teacher_distillation",
+    "native_target",
+    "supervised_decport_target",
+    "random_head_control"
+  ],
+  "temperature": 2.0,
+  "tinyllama_backbone": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+  "train": "data/jev-broad-v0.1/train.jsonl",
+  "train_batch_size": 8,
+  "weight_decay": 0.01
+}

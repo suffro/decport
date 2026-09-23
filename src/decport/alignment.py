@@ -69,7 +69,14 @@ def without_answers(examples: list[DecisionExample]) -> list[DecisionExample]:
     """Return the same decision inputs with every answer removed."""
 
     return [
-        DecisionExample(example.state, example.question, example.options)
+        DecisionExample(
+            example.state,
+            example.question,
+            example.options,
+            dataset=example.dataset,
+            task_family=example.task_family,
+            decision_type=example.decision_type,
+        )
         for example in examples
     ]
 

@@ -1,0 +1,13 @@
+{
+  "adapter_input_size": 2048,
+  "backbone_model_id": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+  "format_version": 1,
+  "includes_head": false,
+  "metadata": {
+    "decision_labels_used_for_adapter": "false",
+    "head": "../../../source/head.safetensors",
+    "role": "mismatched_teacher_distillation",
+    "teacher_outputs": "deliberately_mismatched"
+  },
+  "shared_size": 256
+}

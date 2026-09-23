@@ -1,12 +1,20 @@
 import pytest
 import torch
 
-from decport.backbones import CachedBackbone, GemmaBackbone, QwenBackbone, SmolLMBackbone
+from decport.backbones import (
+    CachedBackbone,
+    GemmaBackbone,
+    LlamaBackbone,
+    QwenBackbone,
+    SmolLMBackbone,
+)
 from decport.schema import DecisionExample
 from tests.fakes import FakeCausalLM, FakeTokenizer
 
 
-@pytest.mark.parametrize("backbone_type", [QwenBackbone, SmolLMBackbone, GemmaBackbone])
+@pytest.mark.parametrize(
+    "backbone_type", [QwenBackbone, SmolLMBackbone, GemmaBackbone, LlamaBackbone]
+)
 def test_backbone_is_frozen_and_extracts_last_non_padding_token(backbone_type: type) -> None:
     model = FakeCausalLM(hidden_size=4)
     backbone = backbone_type(model=model, tokenizer=FakeTokenizer())

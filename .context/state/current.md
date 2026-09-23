@@ -62,13 +62,24 @@ The smallest credible v0.1 implementation and reproducible cross-backbone experi
   labels. BoolQ gains remained small/noisy and calibration worsened, so it is not a general
   portability or OOD claim. Results are under
   `benchmarks/diagnostics/v0.1/2026-09-23-wsl2-rtx4060ti-decision-transfer-scale-seeds0-4/`.
+- Ran the first broad Jev-like five-seed validation on 4,500 train, 2,000 ID, and 1,500 OOD
+  decisions spanning Choice (ARC-Easy/OpenBookQA), Boolean (BoolQ/QNLI), and ordered Score
+  (Yelp/Amazon), adding TinyLlama-1.1B as a third target. Correct Qwen behavior beat both the
+  untrained and mismatched-teacher controls overall on all three targets: ID gains over mismatch
+  were +0.1474 Gemma, +0.1757 SmolLM, and +0.1895 TinyLlama; OOD gains were +0.0661, +0.0851,
+  and +0.0712. The result is positive across Choice and Score on all three targets ID, and Score
+  remains positive OOD on all three. Boolean does not reliably beat the mismatched control, and
+  Gemma Choice OOD is mixed. The audit passed; the full archive is under
+  `benchmarks/diagnostics/v0.1/2026-09-23-wsl2-rtx4060ti-jev-broad-seeds0-4/`.
 
 ## Next
 
-- Treat decision-space distillation as replicated positive ID evidence on two target backbones, not
-  as a general portability claim. Broaden task families and target architectures before promotion.
-- Investigate the consistently poor BoolQ NLL/Brier/ECE without changing the archived protocol or
-  retroactively tuning this experiment.
+- Treat decision-space distillation as broad positive evidence for Choice and ordered Score across
+  three target families, not as universal portability evidence.
+- Prototype a real shared Jev-like DecisionCore next, while making Boolean/Noul-like transfer and
+  calibration explicit acceptance criteria rather than assuming the scalar-head result solved them.
+- Investigate why matched BoolQ/QNLI teacher behavior is not distinguishable from the deliberately
+  mismatched control without changing the archived broad protocol or retroactively tuning it.
 - Do not prioritize further global latent matching without a new head-relevant hypothesis;
   whitening, ridge, and Procrustes did not improve the existing baseline.
 - Commit benchmark results only after a reproducibility run.
