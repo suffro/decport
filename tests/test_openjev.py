@@ -178,6 +178,27 @@ def test_teacher_extracts_calibrated_typed_probabilities_with_core_parity() -> N
     assert 0.0 < noul_probabilities[1] < 1.0
 
 
+def test_teacher_returns_the_exact_head_inputs_per_candidate() -> None:
+    pytest.importorskip("jev.serving")
+    teacher, model = teacher_and_core()
+    items = typed_decisions()
+
+    logits, representations = teacher.raw_logits_and_representations(
+        items, candidate_batch_size=3
+    )
+    digest = teacher.adapter_and_head_sha256()
+
+    assert [tuple(block.shape) for block in representations] == [(2, 6), (1, 6), (3, 6), (5, 6)]
+    for item, row, block in zip(items, logits, representations, strict=True):
+        replay = model.head(block).squeeze(-1).detach()
+        expected = row[1:] if item.kind == "noul" else row
+        assert torch.allclose(replay, expected, atol=1e-6)
+    assert teacher.adapter_and_head_sha256() == digest
+    with torch.no_grad():
+        model.head.bias.add_(1.0)
+    assert teacher.adapter_and_head_sha256() != digest
+
+
 def test_teacher_rejects_a_different_core_and_labeled_inputs() -> None:
     pytest.importorskip("jev.serving")
     model = FakeOpenJevModel()

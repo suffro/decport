@@ -231,6 +231,23 @@ class OpenJevTeacher:
         their logits reassembled before any normalization, exactly as the upstream service does.
         """
 
+        return self.raw_logits_and_representations(
+            decisions, candidate_batch_size=candidate_batch_size
+        )[0]
+
+    def raw_logits_and_representations(
+        self,
+        decisions: Sequence[TypedDecision],
+        *,
+        candidate_batch_size: int,
+    ) -> tuple[list[Tensor], list[Tensor]]:
+        """Upstream typed logits plus the exact float32 head inputs, one row per candidate.
+
+        The representations are the tensors the upstream head reads, captured by a forward hook and
+        parity-checked against the upstream logits on every batch; ``(candidates, hidden)`` per
+        decision, with one candidate for Noul.
+        """
+
         from jev.serving import candidate_batches
 
         if any(decision.answer is not None for decision in decisions):
@@ -238,16 +255,33 @@ class OpenJevTeacher:
         records = [compile_openjev_record(decision) for decision in decisions]
         order = sorted(range(len(records)), key=lambda index: _record_length(records[index]))
         rows: list[list[float]] = [[] for _ in records]
+        states: list[list[Tensor]] = [[] for _ in records]
         ordered = [records[index] for index in order]
         for batch in candidate_batches(ordered, candidate_batch_size):
             pieces = [piece for _, piece in batch]
-            for (position, _), row in zip(batch, self._score_pieces(pieces), strict=True):
+            scored, captured = self._score_pieces(pieces)
+            for (position, _), row, hidden in zip(batch, scored, captured, strict=True):
                 rows[order[position]].extend(row)
+                states[order[position]].append(hidden)
         logits = [torch.tensor(row, dtype=torch.float32) for row in rows]
-        for decision, row in zip(decisions, logits, strict=True):
+        representations = [torch.cat(parts) for parts in states]
+        for decision, row, hidden in zip(decisions, logits, representations, strict=True):
             if len(row) != len(decision.options) or not torch.isfinite(row).all():
                 raise RuntimeError("Open-Jev returned invalid typed logits")
-        return logits
+            if hidden.shape[0] != decision.candidate_count or not torch.isfinite(hidden).all():
+                raise RuntimeError("Open-Jev returned invalid candidate representations")
+        return logits, representations
+
+    def adapter_and_head_sha256(self) -> str:
+        """Digest of the trained LoRA tensors and the head: the non-base weights of the teacher."""
+
+        digest = hashlib.sha256()
+        for name, parameter in sorted(self.model.named_parameters()):
+            if "lora_" in name or name.startswith("head."):
+                digest.update(name.encode("utf-8"))
+                value = parameter.detach().cpu().contiguous().reshape(-1)
+                digest.update(value.view(torch.uint8).numpy().tobytes())
+        return digest.hexdigest()
 
     def calibrated_probabilities(self, decision: TypedDecision) -> list[float]:
         """Open-Jev's calibrated distribution for one decision, as its service returns it."""
@@ -257,7 +291,9 @@ class OpenJevTeacher:
         (row,) = self.raw_logits([decision], candidate_batch_size=1)
         return softmax(row.tolist(), temperature=self.temperature)
 
-    def _score_pieces(self, pieces: list[dict[str, object]]) -> list[list[float]]:
+    def _score_pieces(
+        self, pieces: list[dict[str, object]]
+    ) -> tuple[list[list[float]], list[Tensor]]:
         captured: list[Tensor] = []
         handle = self.model.head.register_forward_hook(
             lambda _module, inputs, _output: captured.append(inputs[0].detach())
@@ -284,7 +320,11 @@ class OpenJevTeacher:
             raise RuntimeError(f"DecPort core differs from the Open-Jev head by {difference}")
         self.input_tokens += int(getattr(self.model, "last_input_tokens", 0))
         self.candidate_sequences += len(upstream)
-        return [row.float().cpu().tolist() for row in rows]
+        hidden = captured[0].float().cpu()
+        if hidden.shape[0] != len(upstream):
+            raise RuntimeError("captured head inputs do not match the candidate count")
+        counts = [1 if piece["kind"] == "noul" else len(row) for row, piece in zip(rows, pieces)]
+        return [row.float().cpu().tolist() for row in rows], list(torch.split(hidden, counts))
 
 
 def installed_openjev_commit() -> str | None:

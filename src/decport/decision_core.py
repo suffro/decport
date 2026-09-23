@@ -164,6 +164,41 @@ def typed_from_example(example: DecisionExample) -> TypedDecision:
     raise ValueError(f"unsupported decision type: {example.decision_type!r}")
 
 
+def typed_logits(kind: str, candidate_scores: Tensor) -> Tensor:
+    """Assemble ``(batch, candidates)`` scalars into typed logits in answer-key order.
+
+    Shared by frozen cores and by source-side core training, so both use identical semantics.
+    """
+
+    if candidate_scores.ndim != 2:
+        raise ValueError("candidate scores must have shape (batch, candidates)")
+    if kind == "noul":
+        if candidate_scores.shape[1] != 1:
+            raise ValueError("a Noul decision scores exactly one candidate")
+        return torch.cat([torch.zeros_like(candidate_scores), candidate_scores], dim=1)
+    if kind in ("choice", "score"):
+        return candidate_scores
+    raise ValueError(f"kind must be one of {DECISION_KINDS}")
+
+
+def mlp_decision_network(
+    input_size: int, hidden_sizes: tuple[int, int] = (512, 128)
+) -> nn.Sequential:
+    """``LayerNorm → Linear → GELU → Linear → GELU → Linear(·, 1)``: one scalar per candidate."""
+
+    if input_size <= 0 or len(hidden_sizes) != 2 or min(hidden_sizes) <= 0:
+        raise ValueError("input_size and both hidden sizes must be positive")
+    first, second = hidden_sizes
+    return nn.Sequential(
+        nn.LayerNorm(input_size),
+        nn.Linear(input_size, first),
+        nn.GELU(),
+        nn.Linear(first, second),
+        nn.GELU(),
+        nn.Linear(second, 1),
+    )
+
+
 class FrozenDecisionCore(nn.Module, ABC):
     """Frozen per-candidate scorer with typed assembly and its own saved calibration."""
 
@@ -196,15 +231,7 @@ class FrozenDecisionCore(nn.Module, ABC):
     def typed_logits(self, kind: str, candidate_scores: Tensor) -> Tensor:
         """Assemble ``(batch, candidates)`` scalars into typed logits in answer-key order."""
 
-        if candidate_scores.ndim != 2:
-            raise ValueError("candidate scores must have shape (batch, candidates)")
-        if kind == "noul":
-            if candidate_scores.shape[1] != 1:
-                raise ValueError("a Noul decision scores exactly one candidate")
-            return torch.cat([torch.zeros_like(candidate_scores), candidate_scores], dim=1)
-        if kind in ("choice", "score"):
-            return candidate_scores
-        raise ValueError(f"kind must be one of {DECISION_KINDS}")
+        return typed_logits(kind, candidate_scores)
 
     def calibrated_logits(self, kind: str, candidate_scores: Tensor) -> Tensor:
         """Typed logits whose softmax is the core's calibrated probability distribution."""
@@ -286,3 +313,101 @@ class LinearDecisionCore(FrozenDecisionCore):
         weight = self.readout.weight
         representation = representation.to(device=weight.device, dtype=torch.float32)
         return self.readout(representation).squeeze(-1)
+
+
+class MLPDecisionCore(FrozenDecisionCore):
+    """Frozen float32 nonlinear core learned once on the source side (decision 0007)."""
+
+    def __init__(
+        self,
+        input_size: int,
+        temperature: float,
+        *,
+        state: Mapping[str, Tensor],
+        hidden_sizes: tuple[int, int] = (512, 128),
+    ) -> None:
+        super().__init__(input_size, temperature)
+        self.hidden_sizes = tuple(int(size) for size in hidden_sizes)
+        self.network = mlp_decision_network(input_size, self.hidden_sizes)
+        if not all(torch.isfinite(value).all() for value in state.values()):
+            raise ValueError("core parameters must be finite")
+        self.network.load_state_dict({key: value.float() for key, value in state.items()})
+        self.requires_grad_(False)
+        self.eval()
+
+    @classmethod
+    def random_control(
+        cls,
+        reference: MLPDecisionCore,
+        *,
+        seed: int,
+        representations: Tensor,
+    ) -> tuple[MLPDecisionCore, dict[str, list[dict[str, float]]]]:
+        """Same architecture and temperature, random weights, layer-wise matched activation scale.
+
+        Every tensor starts as a Gaussian draw rescaled to the reference tensor's Frobenius norm.
+        Then, in order, each Linear layer gets one scalar gain and one scalar shift so that the mean
+        and standard deviation of its pre-activations over ``representations`` (source inputs, no
+        labels) equal the reference core's. No learned direction is copied. Per-tensor norm matching
+        alone is not enough: a trained core's output scale comes largely from layer alignment, and
+        the core's input LayerNorm stops an adapter from compensating.
+
+        Returns the core and the matched per-layer statistics.
+        """
+
+        generator = torch.Generator().manual_seed(seed)
+        state = {}
+        for key, value in sorted(reference.network.state_dict().items()):
+            draw = torch.randn(value.shape, generator=generator)
+            state[key] = draw / draw.norm() * value.detach().cpu().float().norm()
+        device = next(reference.network.parameters()).device
+        network = mlp_decision_network(reference.input_size, reference.hidden_sizes).to(device)
+        network.load_state_dict(state)
+        learned_input = random_input = representations.to(device=device, dtype=torch.float32)
+        statistics: list[dict[str, float]] = []
+        with torch.no_grad():
+            for learned_layer, random_layer in zip(reference.network, network, strict=True):
+                learned_output = learned_layer(learned_input)
+                if isinstance(random_layer, nn.Linear):
+                    drawn = random_layer(random_input).double()
+                    target = learned_output.double()
+                    gain = float(target.std() / drawn.std())
+                    shift = float(target.mean() - gain * drawn.mean())
+                    random_layer.weight.mul_(gain)
+                    random_layer.bias.mul_(gain).add_(shift)
+                    statistics.append(
+                        {"gain": gain, "shift": shift, "mean": float(target.mean()),
+                         "std": float(target.std())}
+                    )
+                learned_input, random_input = learned_output, random_layer(random_input)
+        core = cls(
+            reference.input_size,
+            reference.temperature,
+            state={key: value.detach().cpu() for key, value in network.state_dict().items()},
+            hidden_sizes=reference.hidden_sizes,
+        )
+        return core, {"linear_layers": statistics}
+
+    @property
+    def parameter_count(self) -> int:
+        return sum(parameter.numel() for parameter in self.parameters())
+
+    def score_candidates(self, representation: Tensor) -> Tensor:
+        parameter = next(self.network.parameters())
+        representation = representation.to(device=parameter.device, dtype=torch.float32)
+        return self.network(representation).squeeze(-1)
+
+
+class ScalarIdentityCore(FrozenDecisionCore):
+    """Parameter-free core for modules that already emit one scalar per candidate.
+
+    It keeps typed assembly and one calibration constant, so a target-specific module is trained and
+    scored through exactly the same typed path as an adapter plus a shared core.
+    """
+
+    def __init__(self, temperature: float) -> None:
+        super().__init__(1, temperature)
+        self.eval()
+
+    def score_candidates(self, representation: Tensor) -> Tensor:
+        return representation.float().squeeze(-1)

@@ -33,6 +33,26 @@ Open-Jev 2B model is the teacher, and its trained decision head plus saved calib
   and completeness; `scripts/render_openjev_report.py` renders its tables;
   `scripts/run_jevbench_public.py` runs the public JevBench subset for the teacher or a ported
   target.
+- `src/decport/final_gate.py` (decision 0007): the final ship gate.
+  - A nonlinear `MLPDecisionCore` (`decision_core.py`) is trained once with labels on source-only
+    Open-Jev representations and then frozen.
+  - Targets reach it through a weak `LowRankAdapter` (`adapter.py`, rank-128 linear).
+  - Controls:
+    - a layer-scale-matched random core;
+    - a mismatched teacher;
+    - an untrained adapter;
+    - a target-specific `TargetDecisionModule` scored through a parameter-free
+      `ScalarIdentityCore`.
+  - `evaluate_ship_gate` holds the pre-registered SHIP criteria.
+  - Scripts:
+    - `prepare_source_core_data.py` builds the source-only labeled splits;
+    - `run_final_gate.py` and `run_final_gate_wsl_archive.sh` run the gate;
+    - `audit_final_gate.py` audits a run;
+    - `compare_final_gate_runs.py` checks the reproduction;
+    - `run_final_gate_jevbench.py` runs the public JevBench subset;
+    - `decide_final_gate.py` applies the criteria;
+    - `render_final_gate_report.py` renders the tables.
+  - `OpenJevTeacher.raw_logits_and_representations` returns the parity-checked 2048-d head inputs.
 - `src/decport/model.py`: dynamic Choice scoring and Boolean/basic Score wrappers.
 - `src/decport/data.py`: canonical records, JSONL IO, dataset converters, and option shuffling.
 - `src/decport/train.py`: source/native or adapter-only training.

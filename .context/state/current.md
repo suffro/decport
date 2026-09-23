@@ -2,11 +2,18 @@
 
 ## Current focus
 
-Transfer of a real pretrained decision system: one frozen Open-Jev 2B DecisionCore reused by
-SmolLM2, Gemma 3 270M, and TinyLlama through label-free trainable DecPort adapters. The five-seed
-experiment is complete, reproduced bit-exactly, and accepted. It partially supports DecPort:
-Choice/Score behavior transfers, the pretrained core is not shown to matter, and Noul fails. The
-open question is now whether a non-trivial pretrained core is reusable.
+The final DecPort ship gate (decision 0007) is in progress. Its protocol is frozen; the full run is
+pending.
+
+- One compact nonlinear DecisionCore is learned on source-only Open-Jev representations.
+- It is reused by SmolLM2, Gemma 3 270M, and TinyLlama through weak rank-128 linear adapters.
+- Controls: a scale-matched random core, a mismatched teacher, an untrained adapter, and a
+  target-specific distilled module.
+- It ends in exactly `SHIP` or `NO-SHIP`.
+
+The previous Open-Jev linear-head experiment (decision 0006) is complete and accepted. It partially
+supports DecPort: Choice/Score behavior transfers, the pretrained core is not shown to matter, and
+Noul fails.
 
 ## Recent relevant changes
 

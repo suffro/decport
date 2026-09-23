@@ -45,3 +45,41 @@ class BackboneAdapter(nn.Module):
     @property
     def parameter_count(self) -> int:
         return sum(parameter.numel() for parameter in self.parameters())
+
+
+class LowRankAdapter(nn.Module):
+    """Deliberately weak rank-``rank`` linear map into a frozen core's input space.
+
+    ``LayerNorm(d) → Linear(d, rank, bias=False) → Linear(rank, shared_size, bias=False)`` with no
+    activation, so it cannot implement a nonlinear decision function by itself (decision 0007).
+    """
+
+    def __init__(self, input_size: int, shared_size: int, rank: int = 128) -> None:
+        super().__init__()
+        if input_size <= 0 or shared_size <= 0 or rank <= 0:
+            raise ValueError("input_size, shared_size, and rank must be positive")
+        self.input_size = input_size
+        self.shared_size = shared_size
+        self.rank = rank
+        self.network = nn.Sequential(
+            nn.LayerNorm(input_size),
+            nn.Linear(input_size, rank, bias=False),
+            nn.Linear(rank, shared_size, bias=False),
+        )
+
+    @property
+    def hidden_size(self) -> int:
+        return self.rank
+
+    def forward(self, hidden: Tensor) -> Tensor:
+        if hidden.shape[-1] != self.input_size:
+            raise ValueError(
+                f"expected hidden width {self.input_size}, got {hidden.shape[-1]}"
+            )
+        parameter = next(self.parameters())
+        hidden = hidden.to(device=parameter.device, dtype=parameter.dtype)
+        return self.network(hidden)
+
+    @property
+    def parameter_count(self) -> int:
+        return sum(parameter.numel() for parameter in self.parameters())
