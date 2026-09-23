@@ -28,6 +28,7 @@ class CachedBackbone(DecPortBackbone):
         self.model_id = getattr(backbone, "model_id", None)
         self.max_length = getattr(backbone, "max_length", None)
         self._cache: dict[CacheKey, Tensor] = {}
+        self._prompt_cache: dict[str, Tensor] = {}
         self.backbone.requires_grad_(False)
         self.backbone.eval()
 
@@ -37,7 +38,7 @@ class CachedBackbone(DecPortBackbone):
 
     @property
     def cache_size(self) -> int:
-        return len(self._cache)
+        return len(self._cache) + len(self._prompt_cache)
 
     def train(self, mode: bool = True) -> CachedBackbone:
         super().train(False)
@@ -100,3 +101,36 @@ class CachedBackbone(DecPortBackbone):
                 self._cache[key] = row.detach().cpu().clone()
         device = next(self.backbone.parameters()).device
         return torch.stack([self._cache[key] for key in keys]).to(device)
+
+    @torch.no_grad()
+    def prefill_prompts(self, prompts: Iterable[str], *, batch_size: int = 32) -> int:
+        """Batch all uncached rendered prompts, shortest first, and return additions."""
+
+        if batch_size <= 0:
+            raise ValueError("batch_size must be positive")
+        missing = sorted(
+            {prompt for prompt in prompts if prompt not in self._prompt_cache},
+            key=lambda prompt: (len(prompt), prompt),
+        )
+        for start in range(0, len(missing), batch_size):
+            batch = missing[start : start + batch_size]
+            hidden = self.backbone.encode_prompts(batch)
+            if hidden.shape != (len(batch), self.hidden_size):
+                raise RuntimeError("backbone returned an unexpected hidden-state shape")
+            for prompt, row in zip(batch, hidden, strict=True):
+                self._prompt_cache[prompt] = row.detach().cpu().clone()
+        return len(missing)
+
+    @torch.no_grad()
+    def encode_prompts(self, prompts: Sequence[str]) -> Tensor:
+        if not prompts:
+            raise ValueError("cannot encode an empty batch")
+        missing = list(
+            dict.fromkeys(prompt for prompt in prompts if prompt not in self._prompt_cache)
+        )
+        if missing:
+            hidden = self.backbone.encode_prompts(missing)
+            for prompt, row in zip(missing, hidden, strict=True):
+                self._prompt_cache[prompt] = row.detach().cpu().clone()
+        device = next(self.backbone.parameters()).device
+        return torch.stack([self._prompt_cache[prompt] for prompt in prompts]).to(device)

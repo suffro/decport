@@ -1,0 +1,65 @@
+{
+  "files": {
+    "seed-0/targets/gemma/mismatched_teacher_distillation/adapter.safetensors": {
+      "bytes": 2767328,
+      "sha256": "76fbe88ff7cf82d625b0fc91863f5dd74e83e3acf43696ba531745269eecdc91"
+    },
+    "seed-0/targets/gemma/openjev_teacher_distillation/adapter.safetensors": {
+      "bytes": 2767328,
+      "sha256": "c2d26cae3dd6e88d070bcc83550d75d1db6a6694d9b00f8f7e1eb6254aab09da"
+    },
+    "seed-0/targets/gemma/random_core_distillation/adapter.safetensors": {
+      "bytes": 2767328,
+      "sha256": "84ac570c091fdd79a03e61942e95e42d28de3545cc1e9102790cefbd5f4e748b"
+    },
+    "seed-0/targets/gemma/random_core_distillation/head.safetensors": {
+      "bytes": 8348,
+      "sha256": "6e3712613d4c9ec1b549ee6f59e6bdea039b789a93a610380a4b15d63c032fa6"
+    },
+    "seed-0/targets/gemma/untrained_target_adapter/adapter.safetensors": {
+      "bytes": 2767328,
+      "sha256": "73bc06a4399ef39f6cff71a78b6f035634a38fc8bbb6dfc796c0d00a0ece3cda"
+    },
+    "seed-0/targets/smollm/mismatched_teacher_distillation/adapter.safetensors": {
+      "bytes": 3097568,
+      "sha256": "d26173fde13e118da0f4c67f0df79bb9e7b4230794ceccfd9105e87e54249e75"
+    },
+    "seed-0/targets/smollm/openjev_teacher_distillation/adapter.safetensors": {
+      "bytes": 3097568,
+      "sha256": "d118b518340db99e84c38b77e9cada6b898bcafb06a256e88f85890d20150fc9"
+    },
+    "seed-0/targets/smollm/random_core_distillation/adapter.safetensors": {
+      "bytes": 3097568,
+      "sha256": "aa8edc97386ca40b27547c6c38f05fe24c27f1c0d87eecae11f7f8449406dc77"
+    },
+    "seed-0/targets/smollm/random_core_distillation/head.safetensors": {
+      "bytes": 8348,
+      "sha256": "6e3712613d4c9ec1b549ee6f59e6bdea039b789a93a610380a4b15d63c032fa6"
+    },
+    "seed-0/targets/smollm/untrained_target_adapter/adapter.safetensors": {
+      "bytes": 3097568,
+      "sha256": "e3a22eb2d32600a75ee36c992c67f3d5082511b44b0ac5f5b2fed8779152240f"
+    },
+    "seed-0/targets/tinyllama/mismatched_teacher_distillation/adapter.safetensors": {
+      "bytes": 4220392,
+      "sha256": "9b17b5168c4010bfb27d43408a26f856eb1f7c5dd69e3a72eead5db07ebe3afa"
+    },
+    "seed-0/targets/tinyllama/openjev_teacher_distillation/adapter.safetensors": {
+      "bytes": 4220392,
+      "sha256": "0cb1de54b1ea41802b15ee2c2306efe725110c8a6eb445eac07884a970d2b53d"
+    },
+    "seed-0/targets/tinyllama/random_core_distillation/adapter.safetensors": {
+      "bytes": 4220392,
+      "sha256": "08fc7f913f82281af94085515859195e3c0f92ff40bfe38a0402036bc2e75b23"
+    },
+    "seed-0/targets/tinyllama/random_core_distillation/head.safetensors": {
+      "bytes": 8348,
+      "sha256": "6e3712613d4c9ec1b549ee6f59e6bdea039b789a93a610380a4b15d63c032fa6"
+    },
+    "seed-0/targets/tinyllama/untrained_target_adapter/adapter.safetensors": {
+      "bytes": 4220392,
+      "sha256": "6db93e2f26face53fed62fd0b1cca6d1465259bb9c880c4ba739179cd6c6b64c"
+    }
+  },
+  "note": "Smoke adapters are pipeline checks, not evidence; their weights stay in the ignored run directory. Hashes are recorded for traceability."
+}

@@ -15,7 +15,10 @@ project's validation status.
 
 Each recorded run should include a human-readable report, the runner's `results.json`, environment
 and data provenance, checksums, lightweight safetensors artifacts, and relevant resource telemetry.
-Base-model checkpoints and downloaded upstream datasets do not belong in Git.
+Base-model checkpoints and downloaded upstream datasets do not belong in Git. External-system
+artifacts follow their own terms: Open-Jev weights are identified by package hashes rather than
+copied, and JevBench per-item records or raw responses stay out of Git; only its public-export
+aggregates are archived, always labeled as public-subset results.
 
 `scripts/run_experiment.py` still writes working output to ignored `runs/`. A run is copied here
 only when it is intentionally retained as project evidence.

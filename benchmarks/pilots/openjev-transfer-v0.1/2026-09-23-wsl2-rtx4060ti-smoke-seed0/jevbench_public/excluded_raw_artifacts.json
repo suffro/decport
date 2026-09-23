@@ -1,0 +1,17 @@
+{
+  "note": "Per-item records and raw request/response files contain JevBench task content (only the 72 original tasks are MIT-licensed) and are retained outside Git.",
+  "runs": {
+    "openjev-2b-teacher": {
+      "per_item.jsonl": "20d99725b89f737c0d6f27b4584632502e28528b6606878ec1ac315a67c7c8c4",
+      "raw_files": 231
+    },
+    "smoke-gemma-openjev-teacher-distillation": {
+      "per_item.jsonl": "624c963558383f40e7ef594bffe89de429786ae723c8446025b211b70d930b8c",
+      "raw_files": 231
+    },
+    "smoke-tinyllama-openjev-teacher-distillation": {
+      "per_item.jsonl": "1c18e583754b0e415e8b4ead50055fb8b94c12194b9b8273b1c979b4c37964ef",
+      "raw_files": 231
+    }
+  }
+}

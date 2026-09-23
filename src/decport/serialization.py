@@ -10,6 +10,7 @@ from safetensors.torch import load_file, save_file
 
 from decport.adapter import BackboneAdapter
 from decport.backbones.base import DecPortBackbone
+from decport.decision_core import FrozenDecisionCore
 from decport.head import DecisionHead
 from decport.model import DecPort
 
@@ -31,6 +32,7 @@ def save_artifact(
         "format_version": FORMAT_VERSION,
         "backbone_model_id": getattr(model.backbone, "model_id", None),
         "adapter_input_size": model.adapter.input_size,
+        "adapter_hidden_size": model.adapter.hidden_size,
         "shared_size": model.adapter.shared_size,
         "includes_head": include_head,
         "metadata": dict(metadata or {}),
@@ -50,9 +52,12 @@ def load_artifact(
     backbone: DecPortBackbone,
     *,
     require_head: bool = True,
-    head: DecisionHead | None = None,
+    head: DecisionHead | FrozenDecisionCore | None = None,
 ) -> DecPort:
-    """Load local DecPort components against an already-instantiated backbone."""
+    """Load local DecPort components against an already-instantiated backbone.
+
+    ``head`` may be a shared DecPort head or an external frozen decision core.
+    """
 
     source = Path(directory)
     config = json.loads((source / "config.json").read_text(encoding="utf-8"))
@@ -60,14 +65,18 @@ def load_artifact(
         raise ValueError(f"unsupported artifact format version: {config.get('format_version')}")
     input_size = config.get("adapter_input_size")
     shared_size = config.get("shared_size")
-    if not isinstance(input_size, int) or not isinstance(shared_size, int):
+    # Artifacts written before the intermediate width was configurable used shared_size.
+    hidden_size = config.get("adapter_hidden_size", shared_size)
+    if not all(isinstance(value, int) for value in (input_size, shared_size, hidden_size)):
         raise ValueError("artifact dimensions are missing or invalid")
     if input_size != backbone.hidden_size:
         raise ValueError(
             f"artifact expects hidden size {input_size}, backbone exposes {backbone.hidden_size}"
         )
 
-    adapter = BackboneAdapter(input_size=input_size, shared_size=shared_size)
+    adapter = BackboneAdapter(
+        input_size=input_size, shared_size=shared_size, hidden_size=hidden_size
+    )
     adapter.load_state_dict(load_file(source / "adapter.safetensors"))
 
     includes_head = config.get("includes_head") is True

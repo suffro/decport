@@ -19,10 +19,13 @@ unresolved. This is diagnostic evidence rather than a universal portability clai
 ## Install and test
 
 ```bash
-uv sync --extra dev --extra train
+uv sync --extra dev --extra train --extra openjev
 uv run ruff check .
 uv run pytest
 ```
+
+The `openjev` extra installs Open-Jev at a pinned commit, plus PEFT and Accelerate, for the external
+teacher experiment below.
 
 Real-model inference smoke tests are opt-in because they download both checkpoints:
 
@@ -120,6 +123,45 @@ Score remains positive under dataset shift; Boolean does not reliably beat the m
 | SmolLM2-360M | random control | adapter only | pending | pending | pending | — |
 
 The `1.00` in the native row is the ratio definition, not an observed result.
+
+## Open-Jev DecisionCore transfer (implemented, smoke-tested, not yet run at scale)
+
+This experiment asks one narrow question: can the decision behavior of a real pretrained
+[Open-Jev](https://github.com/Zefan-Cai/Open-Jev) model move to heterogeneous frozen backbones
+through DecPort adapters, while the same Open-Jev decision head and calibration stay frozen?
+
+```text
+Open-Jev 2B (Qwen3.5-2B + LoRA, frozen) ── last token (2048) ──┐  teacher distributions
+                                                                ▼
+                     ONE frozen Open-Jev DecisionCore: trained Linear(2048→1) + typed assembly + T
+                                                                ▲
+SmolLM2 / Gemma 3 270M / TinyLlama (frozen) ── adapter d→256→2048 (only trainable part)
+```
+
+- The teacher is the released `ZefanCai/Open-Jev-2B`, loaded by Open-Jev's own loader at pinned
+  revisions. Its trained head and saved temperature are the frozen core. Every teacher batch
+  proves the core reproduces the upstream head exactly.
+- Choice, Noul, and Score keep Open-Jev semantics. Noul is one prompt with logits `[0, s]`, not a
+  two-option Choice. Metrics are reported per type.
+- Adapters learn only from Open-Jev's calibrated distributions on unlabeled inputs. Controls: the
+  untrained adapter, a deterministic mismatched teacher, and a random frozen core.
+- [JevBench](https://github.com/fstandhartinger/jevbench) runs through a thin adapter over a clean
+  pinned checkout. Only the 231-task public subset exists locally; results are public-subset only.
+
+```bash
+# Multi-seed experiment on the broad Jev-like data (see data/jev-broad-v0.1 preparation above).
+bash scripts/run_openjev_wsl_archive.sh data/jev-broad-v0.1 runs/openjev-transfer-v0.1-seeds0-4
+
+# Public JevBench subset for the teacher or a ported target.
+git clone https://github.com/fstandhartinger/jevbench ../jevbench
+git -C ../jevbench checkout 2fa63fa3226cb369795525ed011800f57dcbd894
+uv run python scripts/run_jevbench_public.py --jevbench-root ../jevbench \
+  --system openjev-teacher --output runs/jevbench-openjev-teacher
+```
+
+The bounded smoke run and the teacher's JevBench fidelity check are archived under
+[`benchmarks/pilots/openjev-transfer-v0.1/`](benchmarks/pilots/openjev-transfer-v0.1/). They
+validate the pipeline only; there is no transfer result yet.
 
 ## Scope
 

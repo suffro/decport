@@ -18,6 +18,13 @@ dependencies = [
 
 [project.optional-dependencies]
 train = ["datasets>=3.0"]
+# External Open-Jev teacher/DecisionCore. The upstream loader requires PEFT and Accelerate;
+# versions match the Open-Jev release runtime. Open-Jev is pinned to one exact commit.
+openjev = [
+  "accelerate==1.13.0",
+  "open-jev @ git+https://github.com/Zefan-Cai/Open-Jev@3308a15ccd7eea1df7a37d6ddc39b023b801ba16",
+  "peft==0.19.1",
+]
 dev = [
   "pytest>=8.3",
   "ruff>=0.9",

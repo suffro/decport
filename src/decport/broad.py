@@ -1,4 +1,8 @@
-"""Batched training and stratified metrics for the broad DecPort validation."""
+"""Batched training and stratified metrics for broad DecPort validations.
+
+Includes the typed path used with an external frozen decision core: candidate prompts are rendered
+by the core's source system, and Choice, Noul, and Score are scored and reported separately.
+"""
 
 from __future__ import annotations
 
@@ -6,13 +10,20 @@ import math
 import random
 import statistics
 from collections import defaultdict
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 
 import torch
 from torch import Tensor, nn
 
 from decport.data import shuffle_options
-from decport.distillation import DistillationConfig, TeacherOutput
+from decport.decision_core import FrozenDecisionCore, TypedDecision
+from decport.distillation import (
+    DistillationConfig,
+    TeacherOutput,
+    _validate_teacher_outputs,
+    batched_distillation_loss,
+)
 from decport.metrics import (
     accuracy,
     brier_score,
@@ -24,10 +35,20 @@ from decport.model import DecPort
 from decport.schema import DecisionExample
 from decport.train import TrainingConfig
 
+RenderPrompts = Callable[[TypedDecision], Sequence[str]]
+
 
 @dataclass(frozen=True, slots=True)
 class BatchedTrainingHistory:
     epoch_losses: tuple[float, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class CoreDistillationHistory:
+    epoch_losses: tuple[float, ...]
+    epoch_kl_divergence: tuple[float, ...]
+    epoch_centered_logit_mse: tuple[float, ...]
+    gradient_audit: dict[str, int]
 
 
 def train_supervised_batched(
@@ -126,17 +147,7 @@ def train_distillation_batched(
             teacher_scores = torch.stack([teacher_outputs[index].scores for index in indices]).to(
                 student_scores.device
             )
-            teacher_probabilities = torch.softmax(teacher_scores / config.temperature, dim=1)
-            student_log_probabilities = torch.log_softmax(
-                student_scores / config.temperature, dim=1
-            )
-            kl = nn.functional.kl_div(
-                student_log_probabilities, teacher_probabilities, reduction="batchmean"
-            )
-            centered_student = student_scores - student_scores.mean(dim=1, keepdim=True)
-            centered_teacher = teacher_scores - teacher_scores.mean(dim=1, keepdim=True)
-            mse = nn.functional.mse_loss(centered_student, centered_teacher)
-            loss = config.temperature**2 * kl + config.centered_logit_mse_weight * mse
+            loss, _, _ = batched_distillation_loss(student_scores, teacher_scores, config)
             loss.backward()
             nn.utils.clip_grad_norm_(trainable, config.max_grad_norm)
             optimizer.step()
@@ -226,6 +237,256 @@ def measure_match_stratified(
     }
     result["macro_across_task_families"] = _macro_metrics(result["by_task_family"])
     return result
+
+
+def score_core_batch(
+    model: DecPort,
+    decisions: Sequence[TypedDecision],
+    render: RenderPrompts,
+) -> Tensor:
+    """Return calibrated typed logits ``(batch, answer keys)`` for one homogeneous batch."""
+
+    core = _require_core(model)
+    kind, count = decisions[0].kind, decisions[0].candidate_count
+    if any((decision.kind, decision.candidate_count) != (kind, count) for decision in decisions):
+        raise ValueError("a typed batch must share one decision kind and candidate count")
+    prompts: list[str] = []
+    for decision in decisions:
+        rendered = list(render(decision))
+        if len(rendered) != count:
+            raise ValueError("rendered prompts do not match the decision's candidate count")
+        prompts.extend(rendered)
+    hidden = model.backbone.encode_prompts(prompts)
+    scores = core(model.adapter(hidden)).reshape(len(decisions), count)
+    return core.calibrated_logits(kind, scores)
+
+
+def train_core_distillation_batched(
+    student_model: DecPort,
+    decisions: list[TypedDecision],
+    teacher_outputs: tuple[TeacherOutput, ...],
+    config: DistillationConfig,
+    *,
+    render: RenderPrompts,
+    batch_size: int,
+) -> CoreDistillationHistory:
+    """Strictly label-free distillation through a frozen decision core.
+
+    ``teacher_outputs`` are the teacher's calibrated typed logits. Only the student adapter is
+    optimized; the backbone and core stay frozen, and the core is verified unchanged afterward.
+    """
+
+    _validate_teacher_outputs(decisions, teacher_outputs)
+    _validate_batch_size(batch_size)
+    core = _require_core(student_model)
+    core_sha256 = core.state_sha256()
+    student_model.backbone.requires_grad_(False)
+    core.requires_grad_(False)
+    student_model.adapter.requires_grad_(True)
+    student_model.train()
+    _assert_only_adapter_trainable(student_model)
+    rng = random.Random(config.seed)
+    torch.manual_seed(config.seed)
+    trainable = list(student_model.adapter.parameters())
+    optimizer = torch.optim.AdamW(
+        trainable, lr=config.learning_rate, weight_decay=config.weight_decay
+    )
+    indexed = list(enumerate(decisions))
+    losses, kls, mses = [], [], []
+    gradient_audit: dict[str, int] | None = None
+    for _ in range(config.epochs):
+        batches = _indexed_batches_by_option_count(indexed, batch_size, rng, key=_typed_group)
+        total = total_kl = total_mse = 0.0
+        count = 0
+        for batch in batches:
+            optimizer.zero_grad(set_to_none=True)
+            student_logits = score_core_batch(
+                student_model, [decision for _, decision in batch], render
+            ).float()
+            teacher_logits = torch.stack(
+                [teacher_outputs[index].scores for index, _ in batch]
+            ).to(student_logits.device)
+            loss, kl, mse = batched_distillation_loss(student_logits, teacher_logits, config)
+            loss.backward()
+            if gradient_audit is None:
+                gradient_audit = _gradient_audit(student_model)
+            nn.utils.clip_grad_norm_(trainable, config.max_grad_norm)
+            optimizer.step()
+            total += float(loss.detach()) * len(batch)
+            total_kl += float(kl.detach()) * len(batch)
+            total_mse += float(mse.detach()) * len(batch)
+            count += len(batch)
+        losses.append(total / count)
+        kls.append(total_kl / count)
+        mses.append(total_mse / count)
+    student_model.eval()
+    core.assert_frozen()
+    if core.state_sha256() != core_sha256:
+        raise RuntimeError("the frozen decision core changed during transfer")
+    if gradient_audit is None:
+        raise RuntimeError("distillation performed no optimization step")
+    return CoreDistillationHistory(tuple(losses), tuple(kls), tuple(mses), gradient_audit)
+
+
+def predict_core_logits(
+    model: DecPort,
+    decisions: Sequence[TypedDecision],
+    *,
+    render: RenderPrompts,
+    batch_size: int,
+) -> list[list[float]]:
+    """Calibrated typed logits for every decision, in input order."""
+
+    _validate_batch_size(batch_size)
+    grouped: dict[tuple[str, int], list[tuple[int, TypedDecision]]] = defaultdict(list)
+    for index, decision in enumerate(decisions):
+        grouped[_typed_group(decision)].append((index, decision))
+    output: list[list[float] | None] = [None] * len(decisions)
+    model.eval()
+    with torch.inference_mode():
+        for group in grouped.values():
+            for start in range(0, len(group), batch_size):
+                batch = group[start : start + batch_size]
+                logits = score_core_batch(model, [decision for _, decision in batch], render)
+                for (index, _), row in zip(batch, logits.float().cpu().tolist(), strict=True):
+                    output[index] = row
+    if any(row is None for row in output):
+        raise RuntimeError("prediction did not cover every decision")
+    return [row for row in output if row is not None]
+
+
+def evaluate_typed(
+    decisions: Sequence[TypedDecision],
+    calibrated_logits: Sequence[Sequence[float]],
+) -> dict[str, object]:
+    """Ground-truth metrics overall, per decision type, and per dataset (evaluation only)."""
+
+    if not decisions or any(decision.answer is None for decision in decisions):
+        raise ValueError("typed evaluation requires labeled decisions")
+    if any(decision.dataset is None for decision in decisions):
+        raise ValueError("typed evaluation requires dataset metadata")
+    if len(decisions) != len(calibrated_logits):
+        raise ValueError("logit rows must match decisions")
+    probabilities = [
+        torch.softmax(torch.tensor(row, dtype=torch.float64), dim=0).tolist()
+        for row in calibrated_logits
+    ]
+    result: dict[str, object] = {
+        "overall": _typed_metrics(decisions, probabilities, range(len(decisions))),
+        "by_decision_type": _grouped_typed(decisions, probabilities, "decision_type"),
+        "by_dataset": _grouped_typed(decisions, probabilities, "dataset"),
+    }
+    result["macro_across_decision_types"] = _macro_metrics(result["by_decision_type"])
+    return result
+
+
+def typed_match(
+    decisions: Sequence[TypedDecision],
+    student_logits: Sequence[Sequence[float]],
+    teacher_outputs: tuple[TeacherOutput, ...],
+    config: DistillationConfig,
+) -> dict[str, object]:
+    """Student/teacher behavior matching overall, per decision type, and per dataset."""
+
+    _validate_teacher_outputs(list(decisions), teacher_outputs)
+    if len(student_logits) != len(decisions):
+        raise ValueError("student logit rows must match decisions")
+    result: dict[str, object] = {
+        "overall": _match_metrics(student_logits, teacher_outputs, config, range(len(decisions))),
+        "by_decision_type": _grouped_match(
+            decisions, student_logits, teacher_outputs, config, "decision_type"
+        ),
+        "by_dataset": _grouped_match(decisions, student_logits, teacher_outputs, config, "dataset"),
+    }
+    result["macro_across_decision_types"] = _macro_metrics(result["by_decision_type"])
+    return result
+
+
+def _typed_metrics(decisions, probabilities, indices):
+    subset = [decisions[index] for index in indices]
+    rows = [probabilities[index] for index in indices]
+    targets = [decision.answer_index for decision in subset]
+    predicted = [max(range(len(row)), key=row.__getitem__) for row in rows]
+    predicted_keys = [decision.options[index] for decision, index in zip(subset, predicted)]
+    answers = [decision.answer for decision in subset]
+    metrics: dict[str, int | float] = {
+        "example_count": len(subset),
+        "accuracy": accuracy(predicted_keys, answers),
+        "macro_f1": macro_f1(predicted_keys, answers),
+        "nll": negative_log_likelihood(rows, targets),
+        "brier": brier_score(rows, targets),
+        "ece": expected_calibration_error(rows, targets, bins=10),
+    }
+    score = [position for position, decision in enumerate(subset) if decision.kind == "score"]
+    if score:
+        metrics["score_ordinal_mae"] = statistics.mean(
+            abs(predicted[position] - targets[position]) for position in score
+        )
+        metrics["score_expected_value_mae"] = statistics.mean(
+            abs(
+                sum(level * value for level, value in enumerate(rows[position]))
+                - targets[position]
+            )
+            for position in score
+        )
+    noul = [position for position, decision in enumerate(subset) if decision.kind == "noul"]
+    if noul:
+        metrics["noul_mean_p_true"] = statistics.mean(rows[position][1] for position in noul)
+        metrics["noul_predicted_true_rate"] = statistics.mean(
+            float(predicted[position] == 1) for position in noul
+        )
+        metrics["noul_label_true_rate"] = statistics.mean(
+            float(targets[position] == 1) for position in noul
+        )
+    return metrics
+
+
+def _grouped_typed(decisions, probabilities, field):
+    groups: dict[str, list[int]] = defaultdict(list)
+    for index, decision in enumerate(decisions):
+        groups[getattr(decision, field)].append(index)
+    return {
+        name: _typed_metrics(decisions, probabilities, indices)
+        for name, indices in sorted(groups.items())
+    }
+
+
+def _typed_group(decision: TypedDecision) -> tuple[str, int]:
+    return decision.kind, len(decision.options)
+
+
+def _require_core(model: DecPort) -> FrozenDecisionCore:
+    if not isinstance(model.head, FrozenDecisionCore):
+        raise TypeError("typed decisions require a FrozenDecisionCore head")
+    return model.head
+
+
+def _assert_only_adapter_trainable(model: DecPort) -> None:
+    trainable = {id(parameter) for parameter in model.parameters() if parameter.requires_grad}
+    adapter = {id(parameter) for parameter in model.adapter.parameters()}
+    if trainable != adapter:
+        raise RuntimeError("only the target adapter may be trainable during transfer")
+
+
+def _gradient_audit(model: DecPort) -> dict[str, int]:
+    """Count tensors that received gradients, by component, after one backward pass."""
+
+    adapter = list(model.adapter.parameters())
+    audit = {
+        "adapter_tensors": len(adapter),
+        "adapter_tensors_with_gradient": sum(parameter.grad is not None for parameter in adapter),
+        "core_tensors_with_gradient": sum(
+            parameter.grad is not None for parameter in model.head.parameters()
+        ),
+        "backbone_tensors_with_gradient": sum(
+            parameter.grad is not None for parameter in model.backbone.parameters()
+        ),
+    }
+    if audit["core_tensors_with_gradient"] or audit["backbone_tensors_with_gradient"]:
+        raise RuntimeError("gradients reached a frozen component")
+    if audit["adapter_tensors_with_gradient"] != audit["adapter_tensors"]:
+        raise RuntimeError("gradients did not reach every adapter tensor")
+    return audit
 
 
 def _score_batch(model: DecPort, examples: list[DecisionExample]) -> Tensor:
@@ -364,10 +625,11 @@ def _batches_by_option_count(examples, batch_size, rng):
     ]
 
 
-def _indexed_batches_by_option_count(indexed, batch_size, rng):
-    buckets: dict[int, list[tuple[int, DecisionExample]]] = defaultdict(list)
+def _indexed_batches_by_option_count(indexed, batch_size, rng, key=None):
+    group = key or (lambda example: len(example.options))
+    buckets: dict[object, list[tuple[int, DecisionExample]]] = defaultdict(list)
     for item in indexed:
-        buckets[len(item[1].options)].append(item)
+        buckets[group(item[1])].append(item)
     batches = []
     for bucket in buckets.values():
         rng.shuffle(bucket)

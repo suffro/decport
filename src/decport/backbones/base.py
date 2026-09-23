@@ -16,6 +16,10 @@ from transformers import (
 )
 
 
+class PromptTooLongError(ValueError):
+    """A rendered prompt exceeds a backbone's limit and truncation is disabled."""
+
+
 class DecPortBackbone(nn.Module, ABC):
     """Minimal contract exposed to the backbone-agnostic DecPort model."""
 
@@ -33,6 +37,14 @@ class DecPortBackbone(nn.Module, ABC):
     ) -> Tensor:
         """Return one frozen hidden representation per candidate option."""
 
+    def encode_prompts(self, prompts: Sequence[str]) -> Tensor:
+        """Return one frozen hidden representation per already-rendered prompt.
+
+        Used when an external decision core defines its own candidate prompts.
+        """
+
+        raise NotImplementedError(f"{type(self).__name__} cannot encode rendered prompts")
+
 
 class HuggingFaceCausalBackbone(DecPortBackbone):
     """Frozen last-token representation from a Hugging Face causal LM."""
@@ -46,6 +58,7 @@ class HuggingFaceCausalBackbone(DecPortBackbone):
         *,
         model_id: str | None = None,
         max_length: int = 512,
+        allow_truncation: bool = True,
     ) -> None:
         super().__init__()
         if max_length <= 0:
@@ -57,6 +70,7 @@ class HuggingFaceCausalBackbone(DecPortBackbone):
         self.tokenizer = tokenizer
         self.model_id = model_id or self.DEFAULT_MODEL_ID
         self.max_length = max_length
+        self.allow_truncation = allow_truncation
         self.model.requires_grad_(False)
         self.model.eval()
 
@@ -73,6 +87,7 @@ class HuggingFaceCausalBackbone(DecPortBackbone):
         model_id: str | None = None,
         *,
         max_length: int = 512,
+        allow_truncation: bool = True,
         tokenizer_kwargs: dict[str, Any] | None = None,
         model_kwargs: dict[str, Any] | None = None,
     ) -> HuggingFaceCausalBackbone:
@@ -92,6 +107,7 @@ class HuggingFaceCausalBackbone(DecPortBackbone):
             tokenizer=tokenizer,
             model_id=selected_model_id,
             max_length=max_length,
+            allow_truncation=allow_truncation,
         )
 
     @property
@@ -129,24 +145,42 @@ class HuggingFaceCausalBackbone(DecPortBackbone):
         if not (len(states) == len(questions) == len(options)):
             raise ValueError("states, questions, and options must have equal lengths")
 
-        prompts = [
-            self.format_prompt(state, question, option)
-            for state, question, option in zip(states, questions, options, strict=True)
-        ]
+        return self.encode_prompts(
+            [
+                self.format_prompt(state, question, option)
+                for state, question, option in zip(states, questions, options, strict=True)
+            ]
+        )
+
+    @torch.no_grad()
+    def encode_prompts(self, prompts: Sequence[str]) -> Tensor:
+        if not prompts:
+            raise ValueError("cannot encode an empty batch")
         encoded = self.tokenizer(
-            prompts,
+            list(prompts),
             padding=True,
-            truncation=True,
-            max_length=self.max_length,
+            truncation=self.allow_truncation,
+            max_length=self.max_length if self.allow_truncation else None,
             return_tensors="pt",
         )
+        if not self.allow_truncation:
+            longest = int(encoded["attention_mask"].sum(dim=1).max())
+            if longest > self.max_length:
+                raise PromptTooLongError(
+                    f"prompt has {longest} tokens, above max_length={self.max_length}; "
+                    "truncation is disabled"
+                )
         input_device = self.model.get_input_embeddings().weight.device
         model_inputs = {key: value.to(input_device) for key, value in encoded.items()}
+        # Only hidden states are used. Keeping one logit position avoids materializing
+        # vocabulary logits for every token (Gemma 3's 262k vocabulary would otherwise dominate
+        # memory); hidden states are computed before the LM head and are unchanged.
         outputs = self.model(
             **model_inputs,
             output_hidden_states=True,
             return_dict=True,
             use_cache=False,
+            logits_to_keep=1,
         )
         if outputs.hidden_states is None:
             raise RuntimeError("backbone did not return hidden states")

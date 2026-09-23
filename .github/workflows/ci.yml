@@ -13,6 +13,6 @@ jobs:
         with:
           python-version: "3.12"
           enable-cache: true
-      - run: uv sync --extra dev
+      - run: uv sync --extra dev --extra openjev
       - run: uv run ruff check .
       - run: uv run pytest

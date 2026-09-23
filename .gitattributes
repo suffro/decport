@@ -6,3 +6,4 @@ benchmarks/diagnostics/**/*.json -text
 benchmarks/diagnostics/**/*.csv -text
 benchmarks/diagnostics/**/SHA256SUMS -text
 benchmarks/diagnostics/**/*.safetensors binary
+benchmarks/pilots/openjev-transfer-v0.1/** -text

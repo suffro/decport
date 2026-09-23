@@ -104,6 +104,21 @@ def test_permuted_teacher_is_deterministic_derangement() -> None:
     )
 
 
+def test_batched_loss_matches_the_per_decision_objective() -> None:
+    from decport.distillation import _loss_components, batched_distillation_loss
+
+    config = DistillationConfig(temperature=2.0, centered_logit_mse_weight=0.1)
+    student = torch.tensor([[0.5, -1.0, 2.0], [1.0, 0.0, -1.0]])
+    teacher = torch.tensor([[1.0, 0.0, 0.5], [-2.0, 3.0, 0.0]])
+
+    loss, kl, mse = batched_distillation_loss(student, teacher, config)
+    rows = [_loss_components(s, t, config.temperature) for s, t in zip(student, teacher)]
+
+    assert kl.item() == pytest.approx(sum(row[0].item() for row in rows) / 2)
+    assert mse.item() == pytest.approx(sum(row[1].item() for row in rows) / 2)
+    assert loss.item() == pytest.approx(4.0 * kl.item() + 0.1 * mse.item())
+
+
 def test_decision_match_is_invariant_to_teacher_logit_offset() -> None:
     teacher, student = _models()
     examples = _unlabeled_examples()

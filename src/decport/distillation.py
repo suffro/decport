@@ -5,6 +5,7 @@ from __future__ import annotations
 import math
 import random
 from collections import defaultdict
+from collections.abc import Callable, Hashable
 from dataclasses import dataclass
 
 import torch
@@ -89,21 +90,26 @@ def permute_teacher_outputs(
     outputs: tuple[TeacherOutput, ...],
     *,
     seed: int,
+    group_key: Callable[[DecisionExample], Hashable] | None = None,
 ) -> tuple[TeacherOutput, ...]:
-    """Derange teacher outputs within equal-option-count groups."""
+    """Derange teacher outputs within groups, by default equal-option-count groups.
+
+    ``group_key`` can make groups stricter, for example so typed decisions only exchange
+    outputs with decisions of the same kind and width.
+    """
 
     _validate_teacher_outputs(examples, outputs)
-    groups: dict[int, list[int]] = defaultdict(list)
+    key = group_key or (lambda example: len(example.options))
+    groups: dict[Hashable, list[int]] = defaultdict(list)
     for index, example in enumerate(examples):
-        groups[len(example.options)].append(index)
+        groups[key(example)].append(index)
 
     rng = random.Random(seed)
     permuted: list[TeacherOutput | None] = [None] * len(outputs)
-    for option_count, indices in groups.items():
+    for group, indices in groups.items():
         if len(indices) < 2:
             raise ValueError(
-                "permuted-teacher control needs at least two examples with "
-                f"{option_count} options"
+                f"permuted-teacher control needs at least two examples in group {group!r}"
             )
         rng.shuffle(indices)
         rotated = indices[1:] + indices[:1]
@@ -220,6 +226,30 @@ def measure_decision_match(
             teacher_probabilities, student_probabilities
         ),
     )
+
+
+def batched_distillation_loss(
+    student_scores: Tensor,
+    teacher_scores: Tensor,
+    config: DistillationConfig,
+) -> tuple[Tensor, Tensor, Tensor]:
+    """Return ``(loss, kl, centered_mse)`` for ``(batch, candidates)`` logits.
+
+    The loss is ``T² × batch-mean KL(teacher || student) + w × centered-logit MSE``.
+    """
+
+    if student_scores.shape != teacher_scores.shape or student_scores.ndim != 2:
+        raise ValueError("student and teacher logits must share one (batch, candidates) shape")
+    teacher_probabilities = torch.softmax(teacher_scores / config.temperature, dim=1)
+    student_log_probabilities = torch.log_softmax(student_scores / config.temperature, dim=1)
+    kl = nn.functional.kl_div(
+        student_log_probabilities, teacher_probabilities, reduction="batchmean"
+    )
+    centered_student = student_scores - student_scores.mean(dim=1, keepdim=True)
+    centered_teacher = teacher_scores - teacher_scores.mean(dim=1, keepdim=True)
+    mse = nn.functional.mse_loss(centered_student, centered_teacher)
+    loss = config.temperature**2 * kl + config.centered_logit_mse_weight * mse
+    return loss, kl, mse
 
 
 def _loss_components(

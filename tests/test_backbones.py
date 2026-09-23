@@ -5,6 +5,7 @@ from decport.backbones import (
     CachedBackbone,
     GemmaBackbone,
     LlamaBackbone,
+    PromptTooLongError,
     QwenBackbone,
     SmolLMBackbone,
 )
@@ -51,6 +52,47 @@ def test_backbone_rejects_misaligned_batches() -> None:
 
     with pytest.raises(ValueError, match="equal lengths"):
         backbone.encode(states=["a"], questions=["q", "q"], options=["x"])
+
+
+def test_rendered_prompts_encode_like_formatted_candidates() -> None:
+    backbone = QwenBackbone(model=FakeCausalLM(hidden_size=4), tokenizer=FakeTokenizer())
+
+    direct = backbone.encode(["state"], ["Choose?"], ["alpha"])
+    rendered = backbone.encode_prompts([backbone.format_prompt("state", "Choose?", "alpha")])
+
+    assert torch.equal(direct, rendered)
+
+
+def test_disabled_truncation_rejects_over_limit_prompts() -> None:
+    # FakeTokenizer produces 3 + len(prompt) % 3 tokens.
+    backbone = QwenBackbone(
+        model=FakeCausalLM(hidden_size=4),
+        tokenizer=FakeTokenizer(),
+        max_length=3,
+        allow_truncation=False,
+    )
+
+    assert backbone.encode_prompts(["abc"]).shape == (1, 4)
+    with pytest.raises(PromptTooLongError, match="truncation is disabled"):
+        backbone.encode_prompts(["abcd"])
+
+
+def test_cached_backbone_prefills_rendered_prompts(monkeypatch) -> None:
+    backbone = SmolLMBackbone(FakeCausalLM(hidden_size=4), FakeTokenizer())
+    cached = CachedBackbone(backbone)
+    expected = backbone.encode_prompts(["one", "three"])
+
+    assert cached.prefill_prompts(["three", "one", "one"], batch_size=1) == 2
+    monkeypatch.setattr(
+        backbone,
+        "encode_prompts",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            AssertionError("prefilled backbone must not be called")
+        ),
+    )
+
+    assert torch.equal(cached.encode_prompts(["one", "three"]), expected)
+    assert cached.cache_size == 2
 
 
 def test_cached_backbone_prefills_exact_frozen_representations(monkeypatch) -> None:

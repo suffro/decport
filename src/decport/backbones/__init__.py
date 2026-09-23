@@ -1,6 +1,10 @@
 """Frozen language-model backbones supported by DecPort."""
 
-from decport.backbones.base import DecPortBackbone, HuggingFaceCausalBackbone
+from decport.backbones.base import (
+    DecPortBackbone,
+    HuggingFaceCausalBackbone,
+    PromptTooLongError,
+)
 from decport.backbones.cache import CachedBackbone
 from decport.backbones.gemma import GemmaBackbone
 from decport.backbones.llama import LlamaBackbone
@@ -13,6 +17,7 @@ __all__ = [
     "GemmaBackbone",
     "HuggingFaceCausalBackbone",
     "LlamaBackbone",
+    "PromptTooLongError",
     "QwenBackbone",
     "SmolLMBackbone",
 ]

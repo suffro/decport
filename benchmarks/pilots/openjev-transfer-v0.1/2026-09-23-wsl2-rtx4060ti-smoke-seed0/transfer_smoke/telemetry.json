@@ -1,0 +1,45 @@
+{
+  "device": "cuda",
+  "peak_gpu_memory_mib_training": 40.41552734375,
+  "seed_seconds": {
+    "0": 3.031546622000178
+  },
+  "targets": {
+    "gemma": {
+      "dtype": "torch.bfloat16",
+      "hidden_size": 640,
+      "max_prompt_tokens": 784,
+      "mean_prompt_tokens": 130.30625,
+      "peak_gpu_memory_mib": 993.2666015625,
+      "prompts": 480,
+      "seconds": 6.384592014000191
+    },
+    "smollm": {
+      "dtype": "torch.bfloat16",
+      "hidden_size": 960,
+      "max_prompt_tokens": 800,
+      "mean_prompt_tokens": 133.55,
+      "peak_gpu_memory_mib": 1692.9140625,
+      "prompts": 480,
+      "seconds": 5.621512041999949
+    },
+    "tinyllama": {
+      "dtype": "torch.bfloat16",
+      "hidden_size": 2048,
+      "max_prompt_tokens": 878,
+      "mean_prompt_tokens": 145.40833333333333,
+      "peak_gpu_memory_mib": 3888.291015625,
+      "prompts": 480,
+      "seconds": 11.832602614000052
+    }
+  },
+  "teacher": {
+    "candidate_batch_size": 8,
+    "candidate_sequences": 480,
+    "core_parity_max_abs_diff": 0.0,
+    "input_tokens": 68022,
+    "max_length": 4096,
+    "peak_gpu_memory_mib": 4221.47021484375,
+    "seconds": 29.559058728000082
+  }
+}

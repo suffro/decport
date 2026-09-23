@@ -1,0 +1,26 @@
+{
+  "adapter_hidden_size": 256,
+  "cache_batch_size": 16,
+  "centered_logit_mse_weight": 0.1,
+  "device": "cuda",
+  "distillation_temperature": 1.0,
+  "epochs": 2,
+  "eval_batch_size": 64,
+  "learning_rate": 0.001,
+  "limit_per_type": {"train": 24, "in_distribution": 12, "out_of_distribution": 12},
+  "max_grad_norm": 1.0,
+  "openjev_package_manifest_sha256": "58319da5c2a948a4645e46d9c982be44867d78779ea1c3bfb81b64867f58ef3a",
+  "openjev_package_repository": "ZefanCai/Open-Jev-2B",
+  "openjev_package_revision": "0c7aa498b1627be8da4acf34c863ff0ee0a92785",
+  "seeds": [0],
+  "target_max_length": 2048,
+  "targets": {
+    "smollm": {"backbone_type": "smollm", "model_id": "HuggingFaceTB/SmolLM2-360M-Instruct"},
+    "gemma": {"backbone_type": "gemma", "model_id": "unsloth/gemma-3-270m-it"},
+    "tinyllama": {"backbone_type": "llama", "model_id": "TinyLlama/TinyLlama-1.1B-Chat-v1.0"}
+  },
+  "teacher_candidate_batch_size": 8,
+  "teacher_max_length": 4096,
+  "train_batch_size": 8,
+  "weight_decay": 0.01
+}
