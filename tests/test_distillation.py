@@ -76,7 +76,8 @@ def test_distillation_updates_only_student_adapter(monkeypatch) -> None:
     )
 
     assert len(history.epochs) == 1
-    assert history.epochs[0].loss >= 0
+    # KL is non-negative; float32 rounding of a near-zero KL can be slightly negative.
+    assert history.epochs[0].loss >= -1e-6
     _assert_equal(teacher_before, teacher.state_dict())
     _assert_equal(student_backbone_before, student.backbone.state_dict())
     _assert_changed(student_adapter_before, student.adapter.state_dict())
