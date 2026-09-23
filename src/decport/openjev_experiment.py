@@ -328,9 +328,22 @@ def _run_seed(
     distillation = replace(config.distillation, seed=seed)
     random_core = LinearDecisionCore.random_control(core, seed=_derived_seed(seed, "random-core"))
     random_core = random_core.to(device)
+    # The broad train split has one 5-option Choice decision; it cannot be deranged within its
+    # kind and width, so it keeps its own teacher output and is reported as a fixed point.
     mismatched = permute_teacher_outputs(
-        unlabeled["train"], teacher_outputs["train"], seed=seed, group_key=_typed_group
+        unlabeled["train"],
+        teacher_outputs["train"],
+        seed=seed,
+        group_key=_typed_group,
+        keep_singletons=True,
     )
+    fixed_points = [
+        index
+        for index, (original, control) in enumerate(
+            zip(teacher_outputs["train"], mismatched, strict=True)
+        )
+        if original is control
+    ]
     targets = {}
     for target in config.targets:
         _progress(f"seed {seed}: target {target.name}")
@@ -365,6 +378,15 @@ def _run_seed(
             "shared_by_targets": [target.name for target in config.targets],
         },
         "random_control_core_sha256": random_core.state_sha256(),
+        "mismatched_teacher_control": {
+            "grouping": "decision kind and option count",
+            "decisions": len(mismatched),
+            "fixed_point_decisions": len(fixed_points),
+            "fixed_point_groups": sorted(
+                {"{}:{}".format(*_typed_group(unlabeled["train"][index])) for index in fixed_points}
+            ),
+            "fixed_point_reason": "singleton kind-and-width group cannot be deranged",
+        },
         "targets": targets,
         "label_free_audit": {
             "transfer_entry_point_rejects_labeled_records": True,

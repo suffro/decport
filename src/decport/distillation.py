@@ -91,11 +91,14 @@ def permute_teacher_outputs(
     *,
     seed: int,
     group_key: Callable[[DecisionExample], Hashable] | None = None,
+    keep_singletons: bool = False,
 ) -> tuple[TeacherOutput, ...]:
     """Derange teacher outputs within groups, by default equal-option-count groups.
 
     ``group_key`` can make groups stricter, for example so typed decisions only exchange
-    outputs with decisions of the same kind and width.
+    outputs with decisions of the same kind and width. A one-member group cannot be deranged;
+    it raises unless ``keep_singletons`` leaves it with its own output, which can only make the
+    mismatched control closer to the correct teacher. Callers must report such fixed points.
     """
 
     _validate_teacher_outputs(examples, outputs)
@@ -107,6 +110,9 @@ def permute_teacher_outputs(
     rng = random.Random(seed)
     permuted: list[TeacherOutput | None] = [None] * len(outputs)
     for group, indices in groups.items():
+        if len(indices) == 1 and keep_singletons:
+            permuted[indices[0]] = outputs[indices[0]]
+            continue
         if len(indices) < 2:
             raise ValueError(
                 f"permuted-teacher control needs at least two examples in group {group!r}"

@@ -155,6 +155,27 @@ def test_mismatched_teacher_is_deterministic_and_stays_within_kind() -> None:
         assert items[source].kind == item.kind
 
 
+def test_mismatched_teacher_keeps_only_an_explicit_singleton_group() -> None:
+    items = decisions() * 2
+    items.append(TypedDecision(
+        "wide", "choice", "Pick", {"a": None, "bb": None, "ccc": None, "dddd": None},
+        dataset="arc",
+    ))
+    outputs = tuple(TeacherOutput(torch.tensor([float(index)] * len(item.options)))
+                    for index, item in enumerate(items))
+
+    def key(item):
+        return item.kind, len(item.options)
+
+    with pytest.raises(ValueError, match="at least two examples"):
+        permute_teacher_outputs(items, outputs, seed=5, group_key=key)
+    permuted = permute_teacher_outputs(items, outputs, seed=5, group_key=key, keep_singletons=True)
+
+    assert permuted[-1] is outputs[-1]
+    assert all(control is not original
+               for original, control in zip(outputs[:-1], permuted[:-1], strict=True))
+
+
 def test_typed_evaluation_and_match_report_each_decision_type() -> None:
     model = student()
     labeled = decisions(labeled=True)

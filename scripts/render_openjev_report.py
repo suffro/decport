@@ -14,6 +14,7 @@ CONDITION_LABELS = {
     "mismatched_teacher_distillation": "mismatched teacher",
     "random_core_distillation": "random frozen core",
 }
+KINDS = ("choice", "noul", "score")
 SHOW_DEVIATION = True
 
 
@@ -81,6 +82,54 @@ def main() -> None:
                     _stat(metrics["noul_mean_p_true"]), _stat(metrics["noul_predicted_true_rate"]),
                     _stat(metrics["noul_label_true_rate"]), _stat(match["kl_divergence"]),
                 ]))
+
+    lines += _section("Teacher matching by decision type")
+    lines += _table(["Target", "Split", "Type", "Condition", "Top-choice agreement",
+                     "KL to teacher", "Probability corr."])
+    for target, values in sorted(summary["targets"].items()):
+        for split, label in SPLITS.items():
+            for kind in KINDS:
+                for condition, name in CONDITION_LABELS.items():
+                    match = values["decision_match"][condition][split]["by_decision_type"][kind]
+                    lines.append(_row([
+                        target, label, kind, name, _stat(match["top_choice_agreement"]),
+                        _stat(match["kl_divergence"]), _stat(match["probability_correlation"]),
+                    ]))
+
+    lines += _section("Score ordinal MAE (lower is better)")
+    lines += _table(["Target", "Split", "Condition", "Ordinal MAE", "Expected-value MAE"])
+    for split, label in SPLITS.items():
+        score = teacher[split]["by_decision_type"]["score"]
+        lines.append(_row(["teacher", label, "Open-Jev 2B", _plain(score["score_ordinal_mae"]),
+                           _plain(score["score_expected_value_mae"])]))
+    for target, values in sorted(summary["targets"].items()):
+        for split, label in SPLITS.items():
+            for condition, name in CONDITION_LABELS.items():
+                score = values["metrics"][condition][split]["by_decision_type"]["score"]
+                lines.append(_row([target, label, name, _stat(score["score_ordinal_mae"]),
+                                   _stat(score["score_expected_value_mae"])]))
+
+    seeds = [
+        json.loads((root / f"seed-{seed}" / "results.json").read_text(encoding="utf-8"))
+        for seed in summary["seeds"]
+    ]
+    lines += _section("Seed consistency (seeds where the correct teacher wins on accuracy)")
+    lines += _table(["Target", "Split", "Group", "> untrained", "> mismatch", "> random core"])
+    for target in sorted(summary["targets"]):
+        for split, label in SPLITS.items():
+            for group in ("overall", *KINDS):
+                cells = [target, label, group]
+                for control in ("untrained", "mismatched_teacher", "random_core"):
+                    wins = 0
+                    for result in seeds:
+                        comparisons = result["targets"][target]["comparisons"][split]
+                        gains = (
+                            comparisons["overall"] if group == "overall"
+                            else comparisons["by_decision_type"][group]
+                        )
+                        wins += gains[f"accuracy_gain_over_{control}"] > 0
+                    cells.append(f"{wins}/{len(seeds)}")
+                lines.append(_row(cells))
 
     lines += _section("Calibration (overall)")
     lines += _table(["Target", "Split", "Condition", "NLL", "Brier", "ECE", "KL to teacher"])
