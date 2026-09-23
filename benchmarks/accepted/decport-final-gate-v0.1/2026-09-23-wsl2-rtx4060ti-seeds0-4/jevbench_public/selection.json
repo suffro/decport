@@ -1,0 +1,26 @@
+{
+  "rule": "trained conditions: the seed with the lowest final-epoch training loss for that (target, condition), ties to the lowest seed; untrained adapter: seed 0. Fixed in decision 0007 before evaluation; no JevBench answer or evaluation label is read.",
+  "selection": {
+    "gemma": {
+      "learned_core_distillation": 3,
+      "mismatched_teacher_distillation": 1,
+      "random_core_distillation": 1,
+      "target_specific_distillation": 1,
+      "untrained_adapter": 0
+    },
+    "smollm": {
+      "learned_core_distillation": 3,
+      "mismatched_teacher_distillation": 0,
+      "random_core_distillation": 3,
+      "target_specific_distillation": 0,
+      "untrained_adapter": 0
+    },
+    "tinyllama": {
+      "learned_core_distillation": 1,
+      "mismatched_teacher_distillation": 2,
+      "random_core_distillation": 2,
+      "target_specific_distillation": 3,
+      "untrained_adapter": 0
+    }
+  }
+}

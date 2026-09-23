@@ -1,0 +1,38 @@
+{
+  "gpu": "NVIDIA GeForce RTX 4060 Ti",
+  "learned_decision_core_sha256": "8d3ec3087e8cefe94f45562723b3bc851c523a245a1a3619c0f0b3104770000d",
+  "openjev_head_parity_max_abs_diff": 0.0,
+  "openjev_package": {
+    "base_model_id": "Qwen/Qwen3.5-2B",
+    "base_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+    "file_sha256": {
+      "LICENSE": "bbedc3fda3305820b977265f01b8619d87570a6739de3a5582c3464840f1e57a",
+      "LICENSE-CODE": "ef2f6f6db605a2f611bc2d037c59276f615cdea76ac6e7551a28f71db890c9d2",
+      "README.md": "396ae55276e6535efd13c818388085d6e3bf41102320616acbae612bb5c19514",
+      "UPSTREAM.md": "8d77b0b07ec0e34af6dfa238d05d2f95109926df91b468bfb238276610d1c420",
+      "checkpoint/adapter/adapter_config.json": "d27624bdbbe984cf175e10c7fa3d9beaea9876231ce943a248ad40e12742fe74",
+      "checkpoint/adapter/adapter_model.safetensors": "2d23935b1a7380db444abac572c04646918ba794e59002d1588236182a3ca18f",
+      "checkpoint/head.pt": "3532cd576c58d5ad5bf17c3e9f2df4be8c70e08c07fa6bb7fa673dcd7b401f2a",
+      "checkpoint/model.json": "d985eafa4d635113ee8cc912e0512a95aac0bed3426e9256931235b75cb3d6c5",
+      "checkpoint/temperature.json": "090fb330a616338210a924d1c370c934e934f30f53f92c8a52a5cc7852cadd99",
+      "metrics.json": "cfa9b7450af2858723385300d99410ecad68eea4ccd2b4154dd1de17e91f0a66",
+      "provenance.json": "2fe168e8d4569b8d351312fc30b884105924bb79e17c7f62c0f7882d36dbc995"
+    },
+    "lora_rank": 8,
+    "manifest_sha256": "58319da5c2a948a4645e46d9c982be44867d78779ea1c3bfb81b64867f58ef3a",
+    "max_length": 4096,
+    "temperature": 1.518796342858676
+  },
+  "packages": {
+    "accelerate": "1.13.0",
+    "open-jev": "0.1.0.dev0",
+    "peft": "0.19.1",
+    "torch": "2.14.0",
+    "transformers": "5.17.0"
+  },
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+  "python": "3.13.15",
+  "run": "runs/decport-final-gate-v0.1-seeds0-4",
+  "scope": "JevBench public subset only: 231 of 534 tasks (72 original, 48 easy, 111 hard). The private and judge tiers are unavailable; this is not a full-benchmark result.",
+  "system": "Open-Jev 2B representation -> learned DecisionCore -> calibration"
+}

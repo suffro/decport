@@ -1,0 +1,62 @@
+{
+  "architecture": "LayerNorm(2048) -> Linear(2048,512) -> GELU -> Linear(512,128) -> GELU -> Linear(128,1)",
+  "calibration": {
+    "calibration_nll": 0.5816471667483639,
+    "calibration_nll_at_temperature_1": 0.5828772333604598,
+    "grid_max": 20.0,
+    "grid_min": 0.05,
+    "grid_points": 4001,
+    "temperature": 1.0842459532099045
+  },
+  "format": "decport.final_gate.v0.1",
+  "hidden_sizes": [
+    512,
+    128
+  ],
+  "input_size": 2048,
+  "parameters": 1118977,
+  "role": "learned_source_core",
+  "state_sha256": "8d3ec3087e8cefe94f45562723b3bc851c523a245a1a3619c0f0b3104770000d",
+  "temperature": 1.0842459532099045,
+  "training": {
+    "config": {
+      "batch_size": 8,
+      "epochs": 10,
+      "learning_rate": 0.001,
+      "max_grad_norm": 1.0,
+      "seed": 0,
+      "temperature_grid": [
+        0.05,
+        20.0,
+        4001
+      ],
+      "weight_decay": 0.01
+    },
+    "epoch_losses": [
+      0.670920521904404,
+      0.5681506413288622,
+      0.5446127817191235,
+      0.5212721933774721,
+      0.5401790444422416,
+      0.5214741844150445,
+      0.5093208937030091,
+      0.5076795745552501,
+      0.5012708344814815,
+      0.5050137420085105
+    ],
+    "epoch_train_accuracy": [
+      0.7568888888888889,
+      0.7764444444444445,
+      0.784,
+      0.7873333333333333,
+      0.7893333333333333,
+      0.7928888888888889,
+      0.7933333333333333,
+      0.7973333333333333,
+      0.7984444444444444,
+      0.7975555555555556
+    ],
+    "labeled_source_decisions": 4500,
+    "seconds": 21.046977695999885
+  }
+}

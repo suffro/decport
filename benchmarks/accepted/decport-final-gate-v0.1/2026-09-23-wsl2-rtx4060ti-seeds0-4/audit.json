@@ -1,0 +1,38 @@
+{
+  "all_recorded_numbers_finite": true,
+  "artifact_hashes_verified": true,
+  "conditions_per_target": [
+    "untrained_adapter",
+    "learned_core_distillation",
+    "mismatched_teacher_distillation",
+    "random_core_distillation",
+    "target_specific_distillation"
+  ],
+  "data_hashes_and_composition_verified": true,
+  "every_decision_counted_in_every_metric": true,
+  "frozen_config_matches_run": true,
+  "frozen_source_and_target_backbones_verified": true,
+  "gradients_only_in_allowed_tensors": true,
+  "learned_core_reloaded_from_artifact_sha256": "8d3ec3087e8cefe94f45562723b3bc851c523a245a1a3619c0f0b3104770000d",
+  "learned_decision_core_sha256": "8d3ec3087e8cefe94f45562723b3bc851c523a245a1a3619c0f0b3104770000d",
+  "matched_adapter_initialization_verified": true,
+  "mismatched_teacher_fixed_points_per_seed": 1,
+  "openjev_head_parity_max_abs_diff": 0.0,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "smoke_run_not_evidence": false,
+  "source_core_disjoint_from_transfer_splits": true,
+  "source_system_output_recompute_max_abs_diff": 0.0,
+  "status": "passed",
+  "strict_label_free_boundary_verified": true,
+  "targets": [
+    "gemma",
+    "smollm",
+    "tinyllama"
+  ]
+}

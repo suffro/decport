@@ -12,3 +12,11 @@
   experiment runner (smoke-tested only).
 - Backbone extraction now requests a single logit position; hidden states are unchanged and Gemma's
   vocabulary logits no longer dominate memory on long prompts.
+- Add the pre-registered final ship gate (decision 0007).
+  - New components: a nonlinear `MLPDecisionCore` with a layer-scale-matched random control, a
+    rank-128 `LowRankAdapter`, a target-specific distilled baseline, and a parameter-free
+    `ScalarIdentityCore`.
+  - Source-only core data preparation, and Open-Jev head-input capture.
+  - Scripts: audit, reproduction comparison, JevBench runner, mechanical verdict, and report
+    rendering.
+  - Final verdict: NO-SHIP. DecPort v0.1 is not released.

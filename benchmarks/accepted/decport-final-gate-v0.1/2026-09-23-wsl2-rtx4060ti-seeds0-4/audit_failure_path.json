@@ -1,0 +1,30 @@
+{
+  "all_tampers_rejected": true,
+  "run": "/mnt/c/Users/loren/Documents/GitHub/decport/runs/decport-final-gate-v0.1-seeds0-4",
+  "tampers": {
+    "altered_adapter_bytes": {
+      "message": "RuntimeError: audit failed: seed 1 smollm learned_core_distillation artifact hash",
+      "rejected": true
+    },
+    "changed_core_digest": {
+      "message": "RuntimeError: audit failed: core changed after run",
+      "rejected": true
+    },
+    "core_gradient": {
+      "message": "RuntimeError: audit failed: seed 2 gemma learned_core_distillation core grads",
+      "rejected": true
+    },
+    "dropped_noul_decision": {
+      "message": "RuntimeError: audit failed: seed 3 smollm random_core_distillation out_of_distribution per-type counts {'choice': 500, 'noul': 499, 'score': 500}",
+      "rejected": true
+    },
+    "labeled_distillation_record": {
+      "message": "RuntimeError: audit failed: seed 0 labeled records",
+      "rejected": true
+    },
+    "mismatched_initialization": {
+      "message": "RuntimeError: audit failed: seed 4 tinyllama random_core_distillation matched initialization",
+      "rejected": true
+    }
+  }
+}

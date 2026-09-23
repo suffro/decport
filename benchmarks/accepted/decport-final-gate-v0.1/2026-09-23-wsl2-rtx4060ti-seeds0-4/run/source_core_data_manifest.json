@@ -1,0 +1,83 @@
+{
+  "preparation": {
+    "datasets_version": "5.0.1",
+    "exact_record_overlap_with_transfer_splits": 0,
+    "purpose": "source-side labeled DecisionCore training and calibration only",
+    "script": "scripts/prepare_source_core_data.py",
+    "seed": 0,
+    "transfer_data_manifest_sha256": "fe55710954d44860c2d750c4a7369094d93ebb241d6355324f39df48d995da7b"
+  },
+  "sources": {
+    "arc_easy_test": {
+      "count": 1800,
+      "dataset": "allenai/ai2_arc",
+      "dataset_config": "ARC-Easy",
+      "fingerprint": "c5493910c10a8c10",
+      "shuffled_index_range": [
+        0,
+        1802
+      ],
+      "skipped_duplicate_indices": [
+        285,
+        1063
+      ],
+      "split": "test"
+    },
+    "boolq_train_unused": {
+      "count": 1800,
+      "dataset": "google/boolq",
+      "dataset_config": null,
+      "fingerprint": "259ee21c69c4688f",
+      "shuffled_index_range": [
+        1500,
+        3300
+      ],
+      "skipped_duplicate_indices": [],
+      "split": "train"
+    },
+    "yelp_train_unused": {
+      "count": 1800,
+      "dataset": "Yelp/yelp_review_full",
+      "dataset_config": null,
+      "fingerprint": "acb5834283ec26be",
+      "shuffled_index_range": [
+        1500,
+        3300
+      ],
+      "skipped_duplicate_indices": [],
+      "split": "train"
+    }
+  },
+  "splits": {
+    "source_core_calibration": {
+      "count": 900,
+      "datasets": {
+        "arc_easy": 300,
+        "boolq": 300,
+        "yelp_review_full": 300
+      },
+      "decision_types": {
+        "boolean": 300,
+        "choice": 300,
+        "score": 300
+      },
+      "file": "source_calibration.jsonl",
+      "sha256": "dfcf07f46122c354e5cd24e1db253bc76e1535b673e4781bca78d945e306dcf8"
+    },
+    "source_core_train": {
+      "count": 4500,
+      "datasets": {
+        "arc_easy": 1500,
+        "boolq": 1500,
+        "yelp_review_full": 1500
+      },
+      "decision_types": {
+        "boolean": 1500,
+        "choice": 1500,
+        "score": 1500
+      },
+      "file": "source_train.jsonl",
+      "sha256": "4a4b2205d8196e9ee3a340d46ccbfaf1e221c7d3ca180c4bfee6717fe5d0ffd9"
+    }
+  }
+}

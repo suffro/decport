@@ -2,18 +2,31 @@
 
 ## Current focus
 
-The final DecPort ship gate (decision 0007) is in progress. Its protocol is frozen; the full run is
-pending.
+**The DecPort final ship gate is closed. FINAL VERDICT: NO-SHIP** (decision 0007, 2026-09-24).
 
-- One compact nonlinear DecisionCore is learned on source-only Open-Jev representations.
-- It is reused by SmolLM2, Gemma 3 270M, and TinyLlama through weak rank-128 linear adapters.
-- Controls: a scale-matched random core, a mismatched teacher, an untrained adapter, and a
-  target-specific distilled module.
-- It ends in exactly `SHIP` or `NO-SHIP`.
+- Report: `benchmarks/accepted/decport-final-gate-v0.1/FINAL_REPORT.md`.
+- The protocol was pre-registered at `d0aa96f`. The five-seed run passed its audit and was
+  reproduced bit-exactly.
+- DecPort v0.1 is not released, and no further experiment is planned under this hypothesis.
 
-The previous Open-Jev linear-head experiment (decision 0006) is complete and accepted. It partially
-supports DecPort: Choice/Score behavior transfers, the pretrained core is not shown to matter, and
-Noul fails.
+**The original hypothesis is rejected for the tested setting.** A learned nonlinear DecisionCore,
+reused through weak rank-128 adapters across SmolLM2-360M, Gemma 3 270M, and TinyLlama-1.1B, gives
+no demonstrated value:
+
+- It is indistinguishable from a scale-matched random core of the same architecture (ID −0.015 to
+  +0.015, OOD −0.011 to +0.006; 0/3 targets pass).
+- It does not beat a target-specific distilled module of similar size (1/3 targets pass).
+- On the JevBench public subset (231/534), only SmolLM2 clears uniform + 5 pp (89/231). Gemma
+  scores 73 and TinyLlama 74, against 73.4 expected from uniform guessing.
+
+**A separate, secondary finding** (not the DecPort hypothesis): label-free, input-specific
+distillation of a real source system's decision behavior into heterogeneous frozen backbones works
+in-distribution.
+
+- It beats the mismatched teacher by +0.10 to +0.17 ID, 5/5 seeds on every target, and keeps
+  +0.04 to +0.07 OOD.
+- It needs no shared learned core.
+- It is strongest for Choice and Score. It fails for Noul, and its OOD calibration is poor.
 
 ## Recent relevant changes
 
@@ -126,25 +139,36 @@ Noul fails.
   - OOD calibration is worse than the untrained adapter on every target.
   - JevBench public subset (231/534): teacher 151 (reproduced); ported SmolLM2 92, Gemma 81,
     TinyLlama 78 (37 context refusals), against about 73 expected from uniform guessing.
+- Ran the pre-registered final ship gate (decision 0007). The archive is
+  `benchmarks/accepted/decport-final-gate-v0.1/2026-09-23-wsl2-rtx4060ti-seeds0-4/`.
+  - A nonlinear core (1.12M parameters) was trained once with labels on 4,500 source-only decisions
+    and frozen. On source representations it scores ID 0.746 and OOD 0.619.
+  - It was reused through rank-128 linear adapters (345k–528k parameters per target).
+  - Five conditions per target; seeds 0–4.
+  - The audit passed, and six tampered copies were rejected. The reproduction was bit-exact: 93
+    result files, 81/81 artifacts.
+  - **FINAL VERDICT: NO-SHIP.** Criteria A (core matters), D (JevBench), and E (practical utility)
+    fail; B (input-specific) and C (OOD over controls) pass.
 
 ## Next
 
-- Test whether a *non-trivial* pretrained core is reusable. Move the frozen core boundary below the
-  rank-one head, so the core includes Open-Jev's top transformer layers, final norm, and LoRA plus
-  its head. The adapter would then map into that layer's residual stream. Keep the same data,
-  seeds, and controls, and use a random-weight core of the same architecture as the decisive
-  control. This is a new design and needs its own decision record before implementation.
-- Diagnose Noul separately. The Noul logit is absolute (`[0, s]`), not relative, and students fit
-  only the marginal P(true). Check whether the teacher's Noul score is recoverable from frozen
-  target states at all, for example with a label-free probe fit to teacher scores, before changing
-  the objective or loss balance.
-- Keep the earlier scalar-head broad validation as historical evidence; do not reinterpret it.
+None under the DecPort hypothesis. The gate's answer is final: do not start a follow-up experiment
+to rescue it, and do not reinterpret earlier evidence as core reuse. Earlier "next" items, such as
+moving the core boundary into Open-Jev's transformer layers or a separate Noul diagnosis, are
+closed with the hypothesis. Any future work would be a different project question with its own
+decision record.
 
 ## Blockers
 
-- No technical implementation blocker.
-- Unverified: reuse of any pretrained core beyond the adapter (the rank-one boundary cannot show
-  it), Noul transfer, OOD Choice on Gemma, and OOD calibration of ported targets.
-- JevBench's private/judge tiers are unavailable, so only public-subset (231/534) results can exist.
-- The teacher's JevBench reproduction is near-exact, not bit-exact, relative to Open-Jev's published
-  runtime.
+- None. The project question is answered.
+- JevBench's private/judge tiers are unavailable, so only public-subset (231/534) results exist.
+- **Lost operational data.** On 2026-09-23, during the final-gate smoke test, a shell-quoting error
+  deleted the git-ignored `runs/` directory.
+  - Lost: the working copies of all earlier runs and the out-of-Git JevBench per-item records,
+    ledgers, and raw responses of the 0006 benchmark.
+  - Every accepted and diagnostic archive in `benchmarks/` is intact. The archives keep the hashes of
+    the lost JevBench files (`excluded_raw_artifacts.json`).
+  - The lost files can be regenerated from the archived adapters with the documented commands.
+    Per-item files embed timestamps, so regenerated copies will not match those hashes byte for
+    byte.
+  - The final gate's own `runs/` outputs were produced after the deletion and are complete.

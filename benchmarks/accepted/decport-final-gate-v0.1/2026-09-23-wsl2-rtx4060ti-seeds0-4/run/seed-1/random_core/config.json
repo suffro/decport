@@ -1,0 +1,36 @@
+{
+  "architecture": "LayerNorm(2048) -> Linear(2048,512) -> GELU -> Linear(512,128) -> GELU -> Linear(128,1)",
+  "format": "decport.final_gate.v0.1",
+  "hidden_sizes": [
+    512,
+    128
+  ],
+  "input_size": 2048,
+  "matched_statistics": {
+    "linear_layers": [
+      {
+        "gain": 4.049810389618291,
+        "mean": -6.583912422226221,
+        "shift": -6.709397095625352,
+        "std": 4.5710527052411445
+      },
+      {
+        "gain": 7.2319979797211715,
+        "mean": -1.409104103754878,
+        "shift": -1.4184433570698465,
+        "std": 3.236404328236216
+      },
+      {
+        "gain": 18.875659042216405,
+        "mean": 10.021670182283536,
+        "shift": 3.9678791395835074,
+        "std": 4.869541540188467
+      }
+    ]
+  },
+  "parameters": 1118977,
+  "role": "random_control_core",
+  "rule": "same architecture and temperature; Gaussian tensors rescaled to the learned tensors' Frobenius norms, then one gain and one shift per Linear layer so its pre-activation mean and std on the source-core training representations equal the learned core's (layer by layer)",
+  "state_sha256": "88c0fc194700997255ee61101c4cbed418f1fbe2f02da6e480b3bb62f8e3e09a",
+  "temperature": 1.0842459532099045
+}

@@ -2,10 +2,13 @@
 
 ## Status
 
-Protocol frozen before the full run. The outcome section is appended after the run, audit, and
-reproduction. The protocol below must not change based on observed results. A restart is allowed
-only for a genuine implementation or runtime bug, and every deviation is recorded under
-"Deviations".
+**Closed. FINAL VERDICT: NO-SHIP** (2026-09-24).
+
+- The protocol was frozen at commit `d0aa96f` before the full run and was not changed afterward.
+- The run passed its audit and was reproduced bit-exactly.
+- Report: `benchmarks/accepted/decport-final-gate-v0.1/FINAL_REPORT.md`. Archive:
+  `benchmarks/accepted/decport-final-gate-v0.1/2026-09-23-wsl2-rtx4060ti-seeds0-4/`.
+- DecPort v0.1 is not released.
 
 ## Question
 
@@ -294,8 +297,61 @@ correctness only. Its accuracy numbers were not used for any decision.
 
 ## Deviations
 
-None yet (deviations are changes after the full run starts).
+None. No run was restarted after the full run started, and nothing in the protocol changed.
 
-## Outcome
+## Outcome (2026-09-24, accepted evidence)
 
-Pending.
+**FINAL VERDICT: NO-SHIP.** The mechanical result is in `verdict.json`.
+
+| Criterion | Passing targets | Result |
+|---|---|---|
+| A. The learned core matters (primary) | none | FAIL |
+| B. Input-specific | SmolLM2, Gemma, TinyLlama | pass |
+| C. Useful under shift | SmolLM2, Gemma, TinyLlama | pass |
+| D. JevBench public subset ≥ uniform + 5 pp | SmolLM2 | FAIL |
+| E. Practical utility vs target-specific | TinyLlama (match route) | FAIL |
+
+**The source system is sound.** The learned core over Open-Jev representations scores 0.746 ID and
+0.619 OOD (Open-Jev's own head: 0.731 / 0.647). It is calibrated with T = 1.084 and does not
+memorize: train accuracy 0.80, held-out calibration 0.76.
+
+**No learned-core reuse.** Learned core minus random core, overall accuracy (mean ± SD; seeds
+positive):
+
+| Target | ID | OOD |
+|---|---:|---:|
+| SmolLM2 | 0.000 ± 0.029 (1/5) | +0.006 (5/5) |
+| Gemma | +0.015 ± 0.039 (2/5) | +0.000 (2/5) |
+| TinyLlama | −0.015 ± 0.022 (2/5) | −0.011 (0/5) |
+
+The learned core gives lower-variance, better-calibrated ID fits (lower KL and ECE) than the random
+core, but not higher accuracy.
+
+**Behavior transfer is real but core-independent.**
+
+- Gains over the mismatched teacher, ID: +0.105 / +0.144 / +0.169, 5/5 seeds on every target.
+- The same gains, OOD: +0.041 / +0.042 / +0.073.
+- The target-specific module matches or beats DecPort (A − E, ID: −0.006 / −0.006 / −0.018) at
+  similar size and identical training cost.
+
+**By type.**
+
+- Choice and Score transfer ID. Choice is weak OOD, and absent OOD on Gemma.
+- Noul fails again: students mostly predict "true", no better than the mismatched control.
+- OOD calibration is poor; TinyLlama OOD NLL is 3.54.
+
+**JevBench public subset (231/534).**
+
+- The source system scores 137.
+- Learned-core DecPort scores 89 / 73 / 74 (SmolLM2 / Gemma / TinyLlama, the last with 37 context
+  refusals), against 73.4 expected from uniform guessing.
+- The random core scores 87 / 73 / 74 and the target-specific module 96 / 70 / 65.
+
+**Consequence.**
+
+- The original DecPort hypothesis is rejected for the tested setting: a reusable learned decision
+  core through lightweight adapters provides no demonstrated value.
+- The secondary finding stands apart from that hypothesis: label-free, input-specific distillation
+  of a source system's decision behavior into heterogeneous frozen backbones works in-distribution.
+  It does not need a shared learned core.
+- No v0.1 release is made.

@@ -1,0 +1,30 @@
+{
+  "criteria_a_b_c_e_identical": true,
+  "difference_count": 0,
+  "differences_above_tolerance": [],
+  "excluded_from_value_comparison": [
+    "wall-clock seconds",
+    "output paths",
+    "experiment_config.json",
+    "provenance.json",
+    "telemetry.json"
+  ],
+  "first": {
+    "end": "2026-09-23T23:00:23+02:00",
+    "start": "2026-09-23T21:48:03+02:00"
+  },
+  "json_files_only_in_reproduction": [],
+  "kind": "independent re-execution of the identical command, code commit, config, data, and hardware",
+  "max_abs_numeric_difference": 0.0,
+  "passed": true,
+  "reproduction": {
+    "end": "2026-09-24T00:13:50+02:00",
+    "start": "2026-09-23T23:00:23+02:00"
+  },
+  "result_json_files_compared": 93,
+  "safetensors_artifacts": 81,
+  "safetensors_byte_identical": 81,
+  "safetensors_mismatched": [],
+  "safetensors_only_in_reproduction": [],
+  "tolerance": 1e-06
+}

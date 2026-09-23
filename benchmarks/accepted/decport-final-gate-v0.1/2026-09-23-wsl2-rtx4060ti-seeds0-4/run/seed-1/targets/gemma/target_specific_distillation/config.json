@@ -1,0 +1,18 @@
+{
+  "backbone_model_id": "unsloth/gemma-3-270m-it",
+  "decision_core": "none",
+  "decision_core_sha256": "43f887496728b9e3d18881cdebd88dbab3bc319541eedf81db1c8f5a4df3b612",
+  "decision_core_temperature": 1.0842459532099045,
+  "decision_labels_used": false,
+  "format": "decport.final_gate.v0.1",
+  "hidden_sizes": [
+    512,
+    128
+  ],
+  "input_size": 640,
+  "module": "TargetDecisionModule",
+  "output_size": 1,
+  "parameters": 395265,
+  "rank": null,
+  "role": "target_specific_distillation"
+}

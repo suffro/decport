@@ -2,6 +2,18 @@
 
 Port decision capabilities across frozen LLM architectures.
 
+> **Final verdict: NO-SHIP.**
+>
+> - The pre-registered final gate (decision 0007) tested whether one learned decision core, frozen
+>   and reused through lightweight adapters, is useful across SmolLM2-360M, Gemma 3 270M, and
+>   TinyLlama-1.1B. It is not.
+> - The learned core is indistinguishable from a scale-matched random core, and a small
+>   target-specific distilled module does as well.
+> - Label-free decision-behavior distillation itself works in-distribution, but it does not need a
+>   shared core.
+> - No v0.1 release is made. See the
+>   [final report](benchmarks/accepted/decport-final-gate-v0.1/FINAL_REPORT.md).
+
 DecPort tests whether a small decision head trained with one language model can be reused with a
 different frozen language model by training only a lightweight adapter. Current validation uses
 Qwen3-0.6B as source and SmolLM2-360M, Gemma 3 270M, and TinyLlama-1.1B as targets.
@@ -124,7 +136,7 @@ Score remains positive under dataset shift; Boolean does not reliably beat the m
 
 The `1.00` in the native row is the ratio definition, not an observed result.
 
-## Open-Jev DecisionCore transfer (implemented, smoke-tested, not yet run at scale)
+## Open-Jev DecisionCore transfer (accepted, decision 0006)
 
 This experiment asks one narrow question: can the decision behavior of a real pretrained
 [Open-Jev](https://github.com/Zefan-Cai/Open-Jev) model move to heterogeneous frozen backbones
@@ -159,9 +171,26 @@ uv run python scripts/run_jevbench_public.py --jevbench-root ../jevbench \
   --system openjev-teacher --output runs/jevbench-openjev-teacher
 ```
 
-The bounded smoke run and the teacher's JevBench fidelity check are archived under
-[`benchmarks/pilots/openjev-transfer-v0.1/`](benchmarks/pilots/openjev-transfer-v0.1/). They
-validate the pipeline only; there is no transfer result yet.
+The five-seed run is accepted and archived under
+[`benchmarks/accepted/openjev-transfer-v0.1/`](benchmarks/accepted/openjev-transfer-v0.1/). Behavior
+transfers on Choice and Score, but a random frozen core does as well as Open-Jev's rank-one head,
+and Noul fails.
+
+## Final ship gate (decision 0007)
+
+The final gate replaced the rank-one head with a nonlinear DecisionCore, learned once with labels
+on source-only Open-Jev representations and then frozen. It also replaced the expressive adapter
+with a rank-128 linear map, and added a scale-matched random core and a target-specific distilled
+module as controls. The verdict is **NO-SHIP**; see the
+[final report](benchmarks/accepted/decport-final-gate-v0.1/FINAL_REPORT.md) and
+[archive](benchmarks/accepted/decport-final-gate-v0.1/2026-09-23-wsl2-rtx4060ti-seeds0-4/).
+
+```bash
+uv run python scripts/prepare_source_core_data.py --output data/jev-broad-v0.1-source-core \
+  --broad-data data/jev-broad-v0.1
+bash scripts/run_final_gate_wsl_archive.sh data/jev-broad-v0.1 data/jev-broad-v0.1-source-core \
+  runs/decport-final-gate-v0.1-seeds0-4
+```
 
 ## Scope
 

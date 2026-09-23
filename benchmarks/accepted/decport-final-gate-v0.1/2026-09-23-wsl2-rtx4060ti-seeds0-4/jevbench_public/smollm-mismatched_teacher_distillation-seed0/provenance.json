@@ -1,0 +1,26 @@
+{
+  "artifact": {
+    "decision_core_sha256": "8d3ec3087e8cefe94f45562723b3bc851c523a245a1a3619c0f0b3104770000d",
+    "path": "runs/decport-final-gate-v0.1-seeds0-4/seed-0/targets/smollm/mismatched_teacher_distillation",
+    "sha256": "d23e7b3ad9f4ab1fd2892abb7b3d3b8cc687468fbad0df32b7485e67de609b1d"
+  },
+  "condition": "mismatched_teacher_distillation",
+  "gpu": "NVIDIA GeForce RTX 4060 Ti",
+  "learned_decision_core_sha256": "8d3ec3087e8cefe94f45562723b3bc851c523a245a1a3619c0f0b3104770000d",
+  "model_id": "HuggingFaceTB/SmolLM2-360M-Instruct",
+  "packages": {
+    "accelerate": "1.13.0",
+    "open-jev": "0.1.0.dev0",
+    "peft": "0.19.1",
+    "torch": "2.14.0",
+    "transformers": "5.17.0"
+  },
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+  "python": "3.13.15",
+  "resolved_revision": "a10cc1512eabd3dde888204e902eca88bddb4951",
+  "run": "runs/decport-final-gate-v0.1-seeds0-4",
+  "scope": "JevBench public subset only: 231 of 534 tasks (72 original, 48 easy, 111 hard). The private and judge tiers are unavailable; this is not a full-benchmark result.",
+  "selected_seed": 0,
+  "selection_rule": "trained conditions: the seed with the lowest final-epoch training loss for that (target, condition), ties to the lowest seed; untrained adapter: seed 0. Fixed in decision 0007 before evaluation; no JevBench answer or evaluation label is read.",
+  "target": "smollm"
+}

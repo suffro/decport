@@ -1,0 +1,66 @@
+{
+  "device": "cuda",
+  "peak_gpu_memory_mib_training": 434.92529296875,
+  "seed_seconds": {
+    "0": 425.94151170500027,
+    "1": 430.14835722099997,
+    "2": 444.3526402520006,
+    "3": 451.47238464899965,
+    "4": 434.32028232500033
+  },
+  "targets": {
+    "gemma": {
+      "dtype": "torch.bfloat16",
+      "hidden_size": 640,
+      "max_prompt_tokens": 1355,
+      "mean_prompt_tokens": 132.6097276995305,
+      "peak_gpu_memory_mib": 1374.302734375,
+      "prompts": 26625,
+      "seconds": 135.07497971800012
+    },
+    "smollm": {
+      "dtype": "torch.bfloat16",
+      "hidden_size": 960,
+      "max_prompt_tokens": 1565,
+      "mean_prompt_tokens": 136.18430046948356,
+      "peak_gpu_memory_mib": 2674.5185546875,
+      "prompts": 26625,
+      "seconds": 170.33923399700006
+    },
+    "tinyllama": {
+      "dtype": "torch.bfloat16",
+      "hidden_size": 2048,
+      "max_prompt_tokens": 1471,
+      "mean_prompt_tokens": 147.7787042253521,
+      "peak_gpu_memory_mib": 5117.4990234375,
+      "prompts": 26625,
+      "seconds": 322.1037028190003
+    }
+  },
+  "teacher": {
+    "candidate_batch_size": 8,
+    "candidate_representations": {
+      "in_distribution": 6631,
+      "out_of_distribution": 5000,
+      "source_core_calibration": 2998,
+      "source_core_train": 14999,
+      "train": 14996
+    },
+    "candidate_sequences": 44624,
+    "input_tokens": 6574169,
+    "max_length": 4096,
+    "openjev_head_parity_max_abs_diff": 0.0,
+    "openjev_lora_and_head_sha256_after": "28ba1c5c7f3e62290177fe070d0fa6eaa6fa477f50a9cb5e5c7ffac991f4255c",
+    "openjev_lora_and_head_sha256_before": "28ba1c5c7f3e62290177fe070d0fa6eaa6fa477f50a9cb5e5c7ffac991f4255c",
+    "peak_gpu_memory_mib": 4398.80419921875,
+    "representation_sha256": {
+      "in_distribution": "b0056c8787a331d88ed504a701c890858a72ee746d47de0a15257fcd063061dc",
+      "out_of_distribution": "05b59582ee2c19010e3fa5869d76f37167f11d93ab1b301f4240bc3764a665e6",
+      "source_core_calibration": "9895a681b36e73515d30d4139ff1df7a6cabe0bd26df4c06dfcb7733c1099824",
+      "source_core_train": "f318413246574e5dd193402aee8f10fc81f4405a06931a3a6124c9fdd3980bee",
+      "train": "538cca4077d2ea132c5c61a463717d898ea3bd659398d8c983960a44928b9542"
+    },
+    "seconds": 1391.6534639729998,
+    "source_backbone_trainable_parameters": 0
+  }
+}

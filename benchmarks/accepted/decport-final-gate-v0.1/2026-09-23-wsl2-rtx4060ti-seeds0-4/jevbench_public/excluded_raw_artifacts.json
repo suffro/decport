@@ -1,0 +1,85 @@
+{
+  "note": "Per-item records, ledgers, and raw request/response files contain JevBench task content (only the 72 original tasks are MIT-licensed) and are retained outside Git.",
+  "runs": {
+    "gemma-learned_core_distillation-seed3": {
+      "ledger.jsonl": "e77c10fd32718493a8e5adf025ab85c37a444cacfaecf3f5bfcfe423f855e376",
+      "per_item.jsonl": "29f36601dfc6bdc30cfb66c204ee7cf106a60c7155734ba1f36bbe6f71716ed9",
+      "raw_files": 231
+    },
+    "gemma-mismatched_teacher_distillation-seed1": {
+      "ledger.jsonl": "77eb9f4cc2502c994cab301414f2fe533afd91320bc6bb6e8784694f39a95c28",
+      "per_item.jsonl": "0a65a7fc6e5086cf4aeb04e7d3e10b37504dc76d3043fd14e57464f04985d605",
+      "raw_files": 231
+    },
+    "gemma-random_core_distillation-seed1": {
+      "ledger.jsonl": "303b7aa45a8307261cec933c633e6ac5bb02dfb85dc950492aec47049f73d9af",
+      "per_item.jsonl": "c80e115bc0c6973fef30bf67e3f09111a439e1aedc8873d60d46992a171dee4a",
+      "raw_files": 231
+    },
+    "gemma-target_specific_distillation-seed1": {
+      "ledger.jsonl": "389697f76c4a17ad649571bb7a20752f11f7c246c986dfa01a577ba148c4d118",
+      "per_item.jsonl": "d396185f003704249808ab505bdb643e17e7c88cdd584c1e5af6b74bcddd15cc",
+      "raw_files": 231
+    },
+    "gemma-untrained_adapter-seed0": {
+      "ledger.jsonl": "ab123dfc1c3dc57f83d603b26bfe7f0f464fce565c6e364ae0852d5546fa016d",
+      "per_item.jsonl": "c70eedbd75c6eee20acd7dd993292b1d7e4a5ea75fb65f18acbee26c1c6d08d3",
+      "raw_files": 231
+    },
+    "smollm-learned_core_distillation-seed3": {
+      "ledger.jsonl": "613e0557ef6aa52fb57e9f04e04269f342f09bcf9dba8fbcdd9081dca7bd191a",
+      "per_item.jsonl": "a0fd1a67934bbd428e8a358bed645c4fc881c3d73d0e3ac0eca158e9eb880ddb",
+      "raw_files": 231
+    },
+    "smollm-mismatched_teacher_distillation-seed0": {
+      "ledger.jsonl": "52e45eefd0e73af5155cfef0c1443dcaf2fec5a1abce224b75821fb045f7eb97",
+      "per_item.jsonl": "dd4dd1ab19244bb3c823b68f9daf70c909931781e3bf7c40280a633c8e18da37",
+      "raw_files": 231
+    },
+    "smollm-random_core_distillation-seed3": {
+      "ledger.jsonl": "2f4913227f424eb1b580bc1006dd626c85c4f284c7dcc7674baab8a50232d219",
+      "per_item.jsonl": "072fcfa1cb67f87682881752670681680ab5342617590f1cddc3080ab2bb33db",
+      "raw_files": 231
+    },
+    "smollm-target_specific_distillation-seed0": {
+      "ledger.jsonl": "3af2f3b6490ddfc2f69704a5282bce33215093d223ebb7e620f5ed7100438c4e",
+      "per_item.jsonl": "cd2f117c3235733795c5e0b99cea697f5b75383934b5cc22c2998830176fefc6",
+      "raw_files": 231
+    },
+    "smollm-untrained_adapter-seed0": {
+      "ledger.jsonl": "67f0711e6d71b8a388379e193a29d2a3e52df0719bee1adefa02429a8847d8d3",
+      "per_item.jsonl": "06c6b96661cc0d3da12a0ac129bd7b562f6af34a33f5bc8f0c05afef4f5f7fec",
+      "raw_files": 231
+    },
+    "source-system": {
+      "ledger.jsonl": "bb9489b516f9770d047564e77acfa8656fb2a50085c719783547bf6d94b913e2",
+      "per_item.jsonl": "9eef96aa6f8fae200ced0612eebdd3c333d6ba12b2b7c56feb19a16dd4a69fef",
+      "raw_files": 231
+    },
+    "tinyllama-learned_core_distillation-seed1": {
+      "ledger.jsonl": "8394caf62d1380275aff7877c59f09ff7c33befbbc627faa9ad5feac9372157f",
+      "per_item.jsonl": "530cdbd2ced420fe18c2cf27e411735a2a08816cb2ce13f7d2be0076ee6d0efa",
+      "raw_files": 231
+    },
+    "tinyllama-mismatched_teacher_distillation-seed2": {
+      "ledger.jsonl": "77eb18ce56aec3940c9248b734a91b202c6f45ce0600b9f9da6579233aa1680e",
+      "per_item.jsonl": "86d8146f32b10e4e066efac75a9f1774ae09a9fdafb9caef12a91ea0b20036d8",
+      "raw_files": 231
+    },
+    "tinyllama-random_core_distillation-seed2": {
+      "ledger.jsonl": "6e21128c44f78c7b08237b166435c7f31a5d1a51f5a40248dcb3d55f7d6b4d41",
+      "per_item.jsonl": "51fe1b347388e36080f67b06b1ce6f0673b6d9ce50a3e5e272d21564912d2b76",
+      "raw_files": 231
+    },
+    "tinyllama-target_specific_distillation-seed3": {
+      "ledger.jsonl": "34174fc273c48eb79125b0a4d3896a56f9d3b45b315a03c0192b613cc18ecde9",
+      "per_item.jsonl": "5d74066123a2ebc760eb9b12b8b2c9ff9fa2da8c0bcf4d70f8935cf2dce422dd",
+      "raw_files": 231
+    },
+    "tinyllama-untrained_adapter-seed0": {
+      "ledger.jsonl": "33a6b9a4b6e0b3f0b69fc8f310ad74b592b9d128ef26e2f618336b0eff1a3471",
+      "per_item.jsonl": "23a903da2db5343bd478b7660bbc229407bacc9dc0b94bcc4ff742bdb6081bbe",
+      "raw_files": 231
+    }
+  }
+}
