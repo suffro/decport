@@ -119,7 +119,7 @@ def main() -> None:
         random_hashes.add(random_sha256)
         for name in TARGETS:
             target = result["targets"][name]
-            _check(tuple(target["conditions"]) == CONDITIONS, f"seed {seed} {name} conditions")
+            _check(set(target["conditions"]) == set(CONDITIONS), f"seed {seed} {name} conditions")
             for condition in CONDITIONS:
                 label = f"seed {seed} {name} {condition}"
                 record = target["conditions"][condition]

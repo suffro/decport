@@ -1,0 +1,32 @@
+{
+  "aggregate_summary_byte_identical": true,
+  "code_commit": [
+    "0ab715530a3facf5d95cba9bedf6949f82ccdd5e",
+    "0ab715530a3facf5d95cba9bedf6949f82ccdd5e"
+  ],
+  "differing_values": [],
+  "excluded_from_value_comparison": [
+    "wall-clock seconds",
+    "output paths",
+    "telemetry.json",
+    "provenance.json",
+    "experiment_config.json"
+  ],
+  "first_run": {
+    "end": "2026-09-23T18:54:13+02:00",
+    "start": "2026-09-23T18:04:05+02:00"
+  },
+  "kind": "independent re-execution of the identical command, code commit, data, and hardware",
+  "max_abs_numeric_difference": 0.0,
+  "provenance_identical_except_git_block": true,
+  "reason_weights_not_duplicated": "byte-identical to transfer/ (hashes verified above)",
+  "reproduction": {
+    "end": "2026-09-23T19:59:01+02:00",
+    "start": "2026-09-23T19:07:24+02:00"
+  },
+  "reproduction_adapter_weights_retained": false,
+  "result_json_files_compared": 70,
+  "safetensors_artifacts": 75,
+  "safetensors_byte_identical": 75,
+  "teacher_raw_logits_byte_identical": true
+}

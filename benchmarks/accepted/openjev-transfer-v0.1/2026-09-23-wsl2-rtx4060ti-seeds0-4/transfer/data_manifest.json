@@ -1,0 +1,135 @@
+{
+  "preparation": {
+    "datasets_version": "5.0.1",
+    "exact_record_overlap_across_splits": 0,
+    "script": "scripts/prepare_broad_data.py",
+    "seed": 0
+  },
+  "sources": {
+    "amazon_ood": {
+      "count": 500,
+      "dataset": "SetFit/amazon_reviews_multi_en",
+      "dataset_config": null,
+      "fingerprint": "63709e13bf188be3",
+      "split": "test"
+    },
+    "arc_easy_eval": {
+      "count": 570,
+      "dataset": "allenai/ai2_arc",
+      "dataset_config": "ARC-Easy",
+      "fingerprint": "19a28d3285a2b4fa",
+      "split": "validation"
+    },
+    "arc_easy_train": {
+      "count": 1500,
+      "dataset": "allenai/ai2_arc",
+      "dataset_config": "ARC-Easy",
+      "fingerprint": "ce651c0bd0cd2f28",
+      "split": "train"
+    },
+    "boolq_eval": {
+      "count": 700,
+      "dataset": "google/boolq",
+      "dataset_config": null,
+      "fingerprint": "5172bd15be84090a",
+      "split": "validation"
+    },
+    "boolq_train": {
+      "count": 1500,
+      "dataset": "google/boolq",
+      "dataset_config": null,
+      "fingerprint": "2c6f9603e2ba5043",
+      "split": "train"
+    },
+    "openbookqa_ood": {
+      "count": 500,
+      "dataset": "allenai/openbookqa",
+      "dataset_config": "main",
+      "fingerprint": "f19740d6535db455",
+      "split": "validation"
+    },
+    "qnli_ood": {
+      "count": 500,
+      "dataset": "nyu-mll/glue",
+      "dataset_config": "qnli",
+      "fingerprint": "6264ea011c29ffd4",
+      "split": "validation"
+    },
+    "yelp_eval": {
+      "count": 730,
+      "dataset": "Yelp/yelp_review_full",
+      "dataset_config": null,
+      "fingerprint": "86041a4854276fca",
+      "split": "test"
+    },
+    "yelp_train": {
+      "count": 1500,
+      "dataset": "Yelp/yelp_review_full",
+      "dataset_config": null,
+      "fingerprint": "22dcf806ab770955",
+      "split": "train"
+    }
+  },
+  "splits": {
+    "in_distribution": {
+      "count": 2000,
+      "datasets": {
+        "arc_easy": 570,
+        "boolq": 700,
+        "yelp_review_full": 730
+      },
+      "decision_types": {
+        "boolean": 700,
+        "choice": 570,
+        "score": 730
+      },
+      "file": "eval.jsonl",
+      "sha256": "9c67d1498c27834ac268cbb047a7a82ef767119e125395ce757946864264e671",
+      "task_families": {
+        "reading_comprehension": 700,
+        "review_rating": 730,
+        "science_question_answering": 570
+      }
+    },
+    "out_of_distribution": {
+      "count": 1500,
+      "datasets": {
+        "amazon_reviews_multi": 500,
+        "openbookqa": 500,
+        "qnli": 500
+      },
+      "decision_types": {
+        "boolean": 500,
+        "choice": 500,
+        "score": 500
+      },
+      "file": "ood.jsonl",
+      "sha256": "35bcbf9e9d00a6757e77c5e5b163ae5c1dbf868cbb0d2377b94757b5f78a8060",
+      "task_families": {
+        "review_rating": 500,
+        "science_question_answering": 500,
+        "textual_entailment": 500
+      }
+    },
+    "train": {
+      "count": 4500,
+      "datasets": {
+        "arc_easy": 1500,
+        "boolq": 1500,
+        "yelp_review_full": 1500
+      },
+      "decision_types": {
+        "boolean": 1500,
+        "choice": 1500,
+        "score": 1500
+      },
+      "file": "train.jsonl",
+      "sha256": "031edadfa128920f45d0b19e46df17103116a4c8ff5d36e0aa687fdda57c839e",
+      "task_families": {
+        "reading_comprehension": 1500,
+        "review_rating": 1500,
+        "science_question_answering": 1500
+      }
+    }
+  }
+}

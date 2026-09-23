@@ -15,4 +15,5 @@ It is separate from the earlier v0.1 scalar-head series. It has its own decision
 | 2026-09-23 | [Windows + WSL2, RTX 4060 Ti](2026-09-23-wsl2-rtx4060ti-smoke-seed0/) | Smoke test + JevBench public fidelity | 0 | 72 / 36 / 36 | Pipeline verified; not evidence |
 
 The multi-seed experiment (`configs/openjev-transfer-v0.1.json`, 4,500 / 2,000 / 1,500 decisions,
-seeds 0–4) has not been run. There is no Open-Jev transfer result yet.
+seeds 0–4) is archived as accepted evidence under
+[`../../accepted/openjev-transfer-v0.1/`](../../accepted/openjev-transfer-v0.1/).

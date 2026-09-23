@@ -1,0 +1,25 @@
+{
+  "note": "Per-item records, ledgers, and raw request/response files contain JevBench task content (only the 72 original tasks are MIT-licensed) and are retained outside Git.",
+  "runs": {
+    "gemma-seed0-openjev-teacher-distillation": {
+      "ledger.jsonl": "ab74e6d19ccf1e98fc27360421da121be6b6a796148e5d2fb5bcefb71a8923da",
+      "per_item.jsonl": "6ef05e76db2cc83ccb5623236e05158c50609242af1d425f3392d1ca518b8807",
+      "raw_files": 231
+    },
+    "openjev-2b-teacher": {
+      "ledger.jsonl": "9e11ec3e7b89bc573f9f73a94b89cc70fda4ec79564c8da72e47911809bb2d2c",
+      "per_item.jsonl": "ce7e0e8110a29f30d65d7bc58569a7fe9769d7f5d60f912f86caa23023a3204b",
+      "raw_files": 231
+    },
+    "smollm-seed0-openjev-teacher-distillation": {
+      "ledger.jsonl": "5db625088db3676c5059cebc581c51106ed98ebbb331790c0c30da8bed343e70",
+      "per_item.jsonl": "81b2ec222d93e3d2cf6f2fbc7ccc7223976f143e53f288a0aef12d04c03af286",
+      "raw_files": 231
+    },
+    "tinyllama-seed1-openjev-teacher-distillation": {
+      "ledger.jsonl": "36695ff1523dddfa5cc22de6c1fa1892b43586f7de538192adf254d2a99d1223",
+      "per_item.jsonl": "376bf064c7172caf9b886e1e9f3c4db2074a7f458dfcb56700bc4869bb7ba0ab",
+      "raw_files": 231
+    }
+  }
+}

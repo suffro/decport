@@ -1,0 +1,159 @@
+{
+  "scope": "JevBench v1.4.0 public subset only: 231 of 534 tasks. Not a full-benchmark result.",
+  "systems": {
+    "gemma-seed0-openjev-teacher-distillation": {
+      "accuracy": 0.35064935064935066,
+      "brier_mean": 0.7041933836013211,
+      "by_question_type": {
+        "choice": [
+          41,
+          139
+        ],
+        "noul": [
+          37,
+          74
+        ],
+        "score": [
+          3,
+          18
+        ]
+      },
+      "by_tier": {
+        "easy": [
+          23,
+          48
+        ],
+        "hard": [
+          34,
+          111
+        ],
+        "original": [
+          24,
+          72
+        ]
+      },
+      "ece_top_label": 0.12492681657704144,
+      "failures": {},
+      "n_correct": 81,
+      "n_planned": 231,
+      "n_valid": 231,
+      "teacher_top_choice_agreement_over_231": 100
+    },
+    "openjev-2b-teacher": {
+      "accuracy": 0.6536796536796536,
+      "brier_mean": 0.47518418369834614,
+      "by_question_type": {
+        "choice": [
+          89,
+          139
+        ],
+        "noul": [
+          49,
+          74
+        ],
+        "score": [
+          13,
+          18
+        ]
+      },
+      "by_tier": {
+        "easy": [
+          48,
+          48
+        ],
+        "hard": [
+          47,
+          111
+        ],
+        "original": [
+          56,
+          72
+        ]
+      },
+      "ece_top_label": 0.13956483765771932,
+      "failures": {},
+      "n_correct": 151,
+      "n_planned": 231,
+      "n_valid": 231
+    },
+    "smollm-seed0-openjev-teacher-distillation": {
+      "accuracy": 0.39826839826839827,
+      "brier_mean": 0.7474450039745709,
+      "by_question_type": {
+        "choice": [
+          51,
+          139
+        ],
+        "noul": [
+          37,
+          74
+        ],
+        "score": [
+          4,
+          18
+        ]
+      },
+      "by_tier": {
+        "easy": [
+          21,
+          48
+        ],
+        "hard": [
+          43,
+          111
+        ],
+        "original": [
+          28,
+          72
+        ]
+      },
+      "ece_top_label": 0.16594610313483885,
+      "failures": {},
+      "n_correct": 92,
+      "n_planned": 231,
+      "n_valid": 231,
+      "teacher_top_choice_agreement_over_231": 79
+    },
+    "tinyllama-seed1-openjev-teacher-distillation": {
+      "accuracy": 0.33766233766233766,
+      "brier_mean": 0.8555960303107378,
+      "by_question_type": {
+        "choice": [
+          38,
+          139
+        ],
+        "noul": [
+          36,
+          74
+        ],
+        "score": [
+          4,
+          18
+        ]
+      },
+      "by_tier": {
+        "easy": [
+          27,
+          48
+        ],
+        "hard": [
+          23,
+          111
+        ],
+        "original": [
+          28,
+          72
+        ]
+      },
+      "ece_top_label": 0.3087639600660493,
+      "failures": {
+        "422:context limit": 37
+      },
+      "n_correct": 78,
+      "n_planned": 231,
+      "n_valid": 194,
+      "teacher_top_choice_agreement_over_231": 88
+    }
+  },
+  "uniform_guess_expected_correct": 73.36666666666666
+}

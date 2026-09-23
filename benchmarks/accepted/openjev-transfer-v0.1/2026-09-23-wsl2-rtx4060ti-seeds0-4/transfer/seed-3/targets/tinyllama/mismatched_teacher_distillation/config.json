@@ -1,0 +1,15 @@
+{
+  "adapter_hidden_size": 256,
+  "adapter_input_size": 2048,
+  "backbone_model_id": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+  "format_version": 1,
+  "includes_head": false,
+  "metadata": {
+    "decision_core": "openjev_2b_head",
+    "decision_core_sha256": "867bd23f8a8892fcb411dda861b1d5d53d74dea86d73b9064d9057cccce973f0",
+    "decision_labels_used_for_adapter": "false",
+    "head_format": "not_included",
+    "role": "mismatched_teacher_distillation"
+  },
+  "shared_size": 2048
+}

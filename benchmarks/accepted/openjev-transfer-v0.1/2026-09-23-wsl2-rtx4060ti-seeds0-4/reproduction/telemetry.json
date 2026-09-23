@@ -1,0 +1,49 @@
+{
+  "device": "cuda",
+  "peak_gpu_memory_mib_training": 40.41552734375,
+  "seed_seconds": {
+    "0": 309.8481349040003,
+    "1": 321.28902789099993,
+    "2": 334.61352034000083,
+    "3": 318.4731822650001,
+    "4": 318.3100305570006
+  },
+  "targets": {
+    "gemma": {
+      "dtype": "torch.bfloat16",
+      "hidden_size": 640,
+      "max_prompt_tokens": 1355,
+      "mean_prompt_tokens": 132.6097276995305,
+      "peak_gpu_memory_mib": 1361.90869140625,
+      "prompts": 26625,
+      "seconds": 133.75460380700042
+    },
+    "smollm": {
+      "dtype": "torch.bfloat16",
+      "hidden_size": 960,
+      "max_prompt_tokens": 1565,
+      "mean_prompt_tokens": 136.18430046948356,
+      "peak_gpu_memory_mib": 2662.12451171875,
+      "prompts": 26625,
+      "seconds": 167.2550127149998
+    },
+    "tinyllama": {
+      "dtype": "torch.bfloat16",
+      "hidden_size": 2048,
+      "max_prompt_tokens": 1471,
+      "mean_prompt_tokens": 147.7787042253521,
+      "peak_gpu_memory_mib": 5105.10498046875,
+      "prompts": 26625,
+      "seconds": 315.63421570399987
+    }
+  },
+  "teacher": {
+    "candidate_batch_size": 8,
+    "candidate_sequences": 26627,
+    "core_parity_max_abs_diff": 0.0,
+    "input_tokens": 3839750,
+    "max_length": 4096,
+    "peak_gpu_memory_mib": 4397.86767578125,
+    "seconds": 798.429982134
+  }
+}

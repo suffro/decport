@@ -10,8 +10,9 @@ project's validation status.
   larger experiment is warranted.
 - [`diagnostics/`](diagnostics/) contains controlled studies of experiment behavior that are not
   accepted benchmark claims.
-- Accepted benchmark results will receive their own top-level collection after a meaningful-scale,
-  multi-seed run has been reproduced. None has been accepted yet.
+- [`accepted/`](accepted/) contains meaningful-scale, multi-seed runs that passed their audit and
+  were reproduced before acceptance. Acceptance certifies the measurement, including negative
+  findings, not a claim beyond the run's report.
 
 Each recorded run should include a human-readable report, the runner's `results.json`, environment
 and data provenance, checksums, lightweight safetensors artifacts, and relevant resource telemetry.

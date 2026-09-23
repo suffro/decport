@@ -1,0 +1,17 @@
+{
+  "code_commit": "c40e898 (before the fix)",
+  "completed_phases": [
+    "Open-Jev teacher pass",
+    "SmolLM2/Gemma 3/TinyLlama caching"
+  ],
+  "effect_direction": "the fixed point can only make the mismatched control closer to the correct teacher, i.e. against the transfer hypothesis",
+  "end": "2026-09-23T17:58:23+02:00",
+  "error": "ValueError: permuted-teacher control needs at least two examples in group ('choice', 5)",
+  "failed_at": "seed 0, building the mismatched-teacher control",
+  "fix": "commit 0ab7155: the singleton keeps its own teacher output and is recorded as a fixed point (1 of 4,500 decisions per seed); all other outputs remain deranged within kind and width",
+  "root_cause": "jev-broad-v0.1 train contains exactly one 5-option Choice decision; a derangement within one decision kind and option count is impossible for a singleton group",
+  "start": "2026-09-23T17:33:34+02:00",
+  "status": "operational failure before any adapter training; superseded by transfer/",
+  "teacher_raw_logits_byte_identical_to_transfer_run": true,
+  "teacher_raw_logits_sha256": "74928b3dfd76856212417aedc95badbe61480b611faa08e5554801c28f8993bf"
+}

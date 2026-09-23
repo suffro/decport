@@ -29,8 +29,10 @@ Open-Jev 2B model is the teacher, and its trained decision head plus saved calib
 - `src/decport/jevbench.py`: thin adapter over a clean checkout of pinned JevBench; JevBench's own
   task loader, request builder, runner, scoring, and summaries are imported, never copied.
 - `src/decport/openjev_experiment.py` and `scripts/run_openjev_experiment.py`: the Open-Jev
-  DecisionCore transfer protocol; `scripts/run_jevbench_public.py` runs the public JevBench subset
-  for the teacher or a ported target.
+  DecisionCore transfer protocol; `scripts/audit_openjev_results.py` audits a full run's invariants
+  and completeness; `scripts/render_openjev_report.py` renders its tables;
+  `scripts/run_jevbench_public.py` runs the public JevBench subset for the teacher or a ported
+  target.
 - `src/decport/model.py`: dynamic Choice scoring and Boolean/basic Score wrappers.
 - `src/decport/data.py`: canonical records, JSONL IO, dataset converters, and option shuffling.
 - `src/decport/train.py`: source/native or adapter-only training.
@@ -130,7 +132,9 @@ Target (only the adapter trains):                                               
   that only adapter parameters are trainable, audits which components received gradients on the
   first step, and verifies the core digest afterward.
 - Open-Jev transfer controls: an untrained matched adapter, a deterministic mismatched teacher
-  (derangement within one decision kind and width), and a random frozen core (same width, weight
+  (derangement within one decision kind and width; a singleton kind-and-width group keeps its own
+  output via `keep_singletons=True` and is reported per seed as a fixed point), and a random
+  frozen core (same width, weight
   norm, bias, and temperature; random direction) trained on the correct teacher.
 - JevBench results must be labeled public-subset results. Per-item records and raw request/response
   files contain JevBench task content and stay in ignored run directories; archives keep aggregate

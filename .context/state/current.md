@@ -2,9 +2,11 @@
 
 ## Current focus
 
-Testing whether a real pretrained decision system transfers: one frozen Open-Jev 2B DecisionCore
-reused by SmolLM2, Gemma 3 270M, and TinyLlama through label-free trainable DecPort adapters. The
-implementation and a bounded smoke test are complete; the multi-seed experiment has not run.
+Transfer of a real pretrained decision system: one frozen Open-Jev 2B DecisionCore reused by
+SmolLM2, Gemma 3 270M, and TinyLlama through label-free trainable DecPort adapters. The five-seed
+experiment is complete, reproduced bit-exactly, and accepted. It partially supports DecPort:
+Choice/Score behavior transfers, the pretrained core is not shown to matter, and Noul fails. The
+open question is now whether a non-trivial pretrained core is reusable.
 
 ## Recent relevant changes
 
@@ -99,27 +101,43 @@ implementation and a bounded smoke test are complete; the multi-seed experiment 
 - Backbone extraction now passes `logits_to_keep=1`. Hidden states were verified bit-identical on
   the three targets, and Gemma 3's 262k-vocabulary logits no longer drive memory past 8 GB on long
   prompts.
+- Ran the five-seed Open-Jev transfer experiment exactly as configured. Its archive is the first
+  accepted benchmark evidence:
+  `benchmarks/accepted/openjev-transfer-v0.1/2026-09-23-wsl2-rtx4060ti-seeds0-4/`.
+  - One operational fix: the train split's single 5-option Choice decision cannot be deranged
+    within kind and width. It keeps its own teacher output as a recorded fixed point (1/4,500).
+  - `scripts/audit_openjev_results.py` passed, and its failure path was exercised. The
+    reproduction was bit-exact (all 75 artifacts, every result value, the teacher logits).
+  - The correct teacher beats the mismatched teacher overall on every target in 5/5 seeds: +0.18
+    ID and +0.07 OOD. Correct-condition accuracy is 0.448–0.466 ID and 0.376–0.393 OOD, against
+    the teacher's 0.731 / 0.647. Choice and Score carry the effect; Score is the only type robust
+    OOD on all targets.
+  - The random frozen core is within noise of the Open-Jev core (ID +0.001 to +0.029). This gives
+    no evidence that the pretrained rank-one core matters.
+  - Noul fails. SmolLM2/TinyLlama learn no input-specific Noul behavior even on training data and
+    collapse to "false". Gemma learns a little.
+  - OOD calibration is worse than the untrained adapter on every target.
+  - JevBench public subset (231/534): teacher 151 (reproduced); ported SmolLM2 92, Gemma 81,
+    TinyLlama 78 (37 context refusals), against about 73 expected from uniform guessing.
 
 ## Next
 
-- Run the first meaningful Open-Jev experiment exactly as configured:
-  `bash scripts/run_openjev_wsl_archive.sh data/jev-broad-v0.1 runs/openjev-transfer-v0.1-seeds0-4`
-  (seeds 0–4, 4,500/2,000/1,500, ten epochs). Measured estimate on the RTX 4060 Ti: about
-  45–60 minutes, with a peak of about 4.4 GB allocated / 5.3 GB on the card. Then reproduce it
-  before committing results.
-- Judge transfer by correct-teacher gains over the mismatched teacher per decision type,
-  especially Noul, and by teacher agreement/KL. Judge whether the *pretrained* core matters by the
-  gain over the random frozen core.
-- After a positive multi-seed result, run each target's correct-teacher adapter on the JevBench
-  public subset and compare with the teacher's 151/231.
+- Test whether a *non-trivial* pretrained core is reusable. Move the frozen core boundary below the
+  rank-one head, so the core includes Open-Jev's top transformer layers, final norm, and LoRA plus
+  its head. The adapter would then map into that layer's residual stream. Keep the same data,
+  seeds, and controls, and use a random-weight core of the same architecture as the decisive
+  control. This is a new design and needs its own decision record before implementation.
+- Diagnose Noul separately. The Noul logit is absolute (`[0, s]`), not relative, and students fit
+  only the marginal P(true). Check whether the teacher's Noul score is recoverable from frozen
+  target states at all, for example with a label-free probe fit to teacher scores, before changing
+  the objective or loss balance.
 - Keep the earlier scalar-head broad validation as historical evidence; do not reinterpret it.
-- Commit benchmark results only after a reproducibility run.
 
 ## Blockers
 
 - No technical implementation blocker.
-- Unverified: any Open-Jev transfer effect, whether the pretrained core matters beyond a fixed
-  rank-one readout, OOD behavior, and calibration of ported targets.
+- Unverified: reuse of any pretrained core beyond the adapter (the rank-one boundary cannot show
+  it), Noul transfer, OOD Choice on Gemma, and OOD calibration of ported targets.
 - JevBench's private/judge tiers are unavailable, so only public-subset (231/534) results can exist.
 - The teacher's JevBench reproduction is near-exact, not bit-exact, relative to Open-Jev's published
   runtime.

@@ -3,7 +3,9 @@
 ## Status
 
 Accepted as the implementation path for testing transfer of a real pretrained decision system.
-Implemented and smoke-tested only. No transfer or portability evidence exists yet.
+The five-seed experiment ran and was reproduced bit-exactly (2026-09-23; see "Multi-seed outcome").
+It partially supports DecPort: behavior transfers, but the pretrained core is not shown to matter,
+and Noul fails.
 
 ## Question
 
@@ -41,7 +43,9 @@ stays frozen?
   transfer entry point rejects labeled records, asserts that only adapter parameters are trainable,
   and audits that gradients reach every adapter tensor and no frozen tensor.
 - **Controls.** Untrained matched adapter; deterministic mismatched teacher (derangement within one
-  decision kind and width, so types are never mixed); random frozen core with the same width, weight
+  decision kind and width, so types are never mixed; a singleton kind-and-width group keeps its own
+  output and is reported as a fixed point, which on the broad split is 1 of 4,500 decisions);
+  random frozen core with the same width, weight
   norm, bias, and temperature but a random direction, trained on the correct teacher. All
   conditions of a target start from one adapter state.
 - **Data.** The existing broad Jev-like 4,500/2,000/1,500 split (ARC-Easy, BoolQ, Yelp;
@@ -91,6 +95,40 @@ Seed 0, 72/36/36 decisions, two epochs, all three targets, RTX 4060 Ti 8 GB:
 - Gemma's full-vocabulary logits pushed caching past 8 GB on long prompts. Backbone extraction now
   passes `logits_to_keep=1`, which leaves hidden states bit-identical.
 
+## Multi-seed outcome (2026-09-23, accepted evidence)
+
+The protocol ran as configured: seeds 0–4, 4,500 / 2,000 / 1,500 decisions, ten epochs. The
+archive is under `benchmarks/accepted/openjev-transfer-v0.1/2026-09-23-wsl2-rtx4060ti-seeds0-4/`.
+
+- **Deviation.** The first attempt aborted before training. The broad train split has one
+  5-option Choice decision, which cannot be deranged within its kind and width. It now keeps its
+  own teacher output as a recorded fixed point, which works against the hypothesis.
+- **Integrity.** The audit passed. Teacher/core parity was 0.0. The core digest was unchanged
+  after every condition and when reloaded independently. Gradients reached adapters only, zero
+  labels entered transfer, and every decision is counted. The reproduction was bit-exact: 75/75
+  artifacts and all results.
+- **Behavior transfers.** The correct teacher beats the mismatched teacher overall on every target
+  in 5/5 seeds: +0.175 to +0.185 ID and +0.064 to +0.072 OOD. Correct-condition ID accuracy is
+  0.448–0.466 against the teacher's 0.731. The effect comes from Choice (ID +0.23 to +0.42; OOD
+  positive on SmolLM2/TinyLlama, absent on Gemma) and Score (ID and OOD, every target, 5/5 seeds).
+- **The pretrained core is not shown to matter.** The random frozen core is within noise of the
+  Open-Jev core on every target (ID +0.001 to +0.029, OOD +0.004 to +0.013), with nearly identical
+  agreement and KL. This confirms the known limitation above. With a rank-one linear core, the
+  adapter absorbs the readout direction, so this boundary cannot demonstrate core reuse.
+- **Noul fails.** SmolLM2 and TinyLlama learn no input-specific Noul behavior even on training
+  decisions (teacher correlation about 0.05; Noul KL unchanged from the untrained adapter). They
+  collapse to "false" (ID 0.36). Gemma learns some (ID 0.51, +0.11 over mismatch) but is no better
+  than its random core.
+- **Calibration.** OOD NLL, Brier, and ECE are worse than the untrained adapter on every target.
+- **JevBench public subset (231/534).** Teacher 151. Label-free-selected ported adapters: SmolLM2
+  92, Gemma 81, TinyLlama 78 (37 context refusals). Uniform guessing expects about 73. Ported Noul
+  is at chance.
+
+Consequence for the project: DecPort adapters can carry input-specific decision behavior from a
+real external system across heterogeneous frozen backbones without labels. This experiment gives
+no evidence that a pretrained decision *core* is reusable, because the linear-head core boundary is
+too weak to test it.
+
 ## Consequences
 
 - Open-Jev teacher inference is the dominant cost; it runs once for all seeds and targets. Measured
@@ -99,5 +137,5 @@ Seed 0, 72/36/36 decisions, two epochs, all three targets, RTX 4060 Ti 8 GB:
   candidate batch 8.
 - JevBench per-item records and raw responses stay out of Git; archives keep aggregate reports and
   hashes.
-- Results must not be described as portability evidence until the multi-seed experiment exists and
-  has been reproduced.
+- Results may be described only within the scope of the multi-seed outcome above: transfer of
+  Choice/Score behavior, not general portability, not core reuse, and not Noul.

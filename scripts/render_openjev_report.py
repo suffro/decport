@@ -63,6 +63,18 @@ def main() -> None:
                     _stat(gains["accuracy_gain_over_random_core"], signed=True),
                 ]))
 
+    lines += _section("Accuracy by decision type and condition")
+    lines += _table(["Target", "Split", "Type", "Teacher", *CONDITION_LABELS.values()])
+    for target, values in sorted(summary["targets"].items()):
+        for split, label in SPLITS.items():
+            for kind in KINDS:
+                lines.append(_row([
+                    target, label, kind,
+                    _plain(teacher[split]["by_decision_type"][kind]["accuracy"]),
+                    *(_stat(values["metrics"][condition][split]["by_decision_type"][kind]
+                            ["accuracy"]) for condition in CONDITION_LABELS),
+                ]))
+
     lines += _section("Noul behavior")
     lines += _table(["Target", "Split", "Condition", "Accuracy", "Mean P(true)",
                      "Predicted true rate", "Label true rate", "KL to teacher"])

@@ -1,0 +1,63 @@
+{
+  "cuda": {
+    "pytorch_cuda_version": "13.0"
+  },
+  "git": {
+    "code_commit": "0ab715530a3facf5d95cba9bedf6949f82ccdd5e",
+    "note": "WSL Git reports every file as modified because of DrvFs mode bits, so provenance.json records git_worktree_dirty=true. Checked from Windows Git: the transfer run started from a clean 0ab7155 worktree; during the reproduction only scripts/audit_openjev_results.py and scripts/render_openjev_report.py had uncommitted edits, neither of which is imported by the experiment. Those edits are committed together with this archive."
+  },
+  "gpu": {
+    "memory_mib": 8188,
+    "model": "NVIDIA GeForce RTX 4060 Ti",
+    "windows_driver_version": "32.0.16.1062",
+    "wsl_nvidia_smi_driver_version": "610.62"
+  },
+  "operating_system": {
+    "host": "Windows",
+    "wsl_distribution": "Ubuntu 26.04 LTS",
+    "wsl_kernel": "6.18.33.2-microsoft-standard-WSL2",
+    "wsl_version": 2
+  },
+  "packages": {
+    "accelerate": "1.13.0",
+    "datasets": "5.0.1",
+    "huggingface-hub": "1.32.0",
+    "open-jev": "0.1.0.dev0 (git 3308a15ccd7eea1df7a37d6ddc39b023b801ba16)",
+    "peft": "0.19.1",
+    "safetensors": "0.8.0",
+    "tokenizers": "0.23.2",
+    "torch": "2.14.0+cu130",
+    "transformers": "5.17.0",
+    "uv": "0.12.17"
+  },
+  "python": "3.13.15",
+  "upstream_revisions": {
+    "jevbench": {
+      "commit": "2fa63fa3226cb369795525ed011800f57dcbd894",
+      "release": "v1.4.0",
+      "repository": "https://github.com/fstandhartinger/jevbench"
+    },
+    "open_jev_code": {
+      "commit": "3308a15ccd7eea1df7a37d6ddc39b023b801ba16",
+      "repository": "https://github.com/Zefan-Cai/Open-Jev"
+    },
+    "open_jev_model": {
+      "package_manifest_sha256": "58319da5c2a948a4645e46d9c982be44867d78779ea1c3bfb81b64867f58ef3a",
+      "repository": "ZefanCai/Open-Jev-2B",
+      "revision": "0c7aa498b1627be8da4acf34c863ff0ee0a92785"
+    },
+    "teacher_base_model": {
+      "model_id": "Qwen/Qwen3.5-2B",
+      "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc"
+    },
+    "targets": {
+      "HuggingFaceTB/SmolLM2-360M-Instruct": "a10cc1512eabd3dde888204e902eca88bddb4951",
+      "TinyLlama/TinyLlama-1.1B-Chat-v1.0": "fe8a4ea1ffedaf415f4da2f062534de366a451e6",
+      "unsloth/gemma-3-270m-it": "23cf460f6bb16954176b3ddcc8d4f250501458a9"
+    }
+  },
+  "optimized_kernels": {
+    "causal_conv1d": "not installed (upstream reference PyTorch path)",
+    "flash_linear_attention": "not installed (upstream reference PyTorch path)"
+  }
+}

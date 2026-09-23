@@ -1,0 +1,31 @@
+{
+  "all_recorded_numbers_finite": true,
+  "conditions_per_target": [
+    "untrained_target_adapter",
+    "openjev_teacher_distillation",
+    "mismatched_teacher_distillation",
+    "random_core_distillation"
+  ],
+  "data_hashes_and_composition_verified": true,
+  "decision_core_reloaded_after_run_sha256": null,
+  "decision_core_sha256": "867bd23f8a8892fcb411dda861b1d5d53d74dea86d73b9064d9057cccce973f0",
+  "every_decision_counted_in_every_metric": true,
+  "gradients_only_in_target_adapters": true,
+  "mismatched_teacher_fixed_points_per_seed": 1,
+  "same_openjev_core_for_all_targets_and_seeds": true,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "status": "passed",
+  "strict_label_free_boundary_verified": true,
+  "targets": [
+    "gemma",
+    "smollm",
+    "tinyllama"
+  ],
+  "teacher_core_parity_max_abs_diff": 0.0
+}
