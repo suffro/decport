@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "decport"
 version = "0.1.0.dev0"
-description = "Portable decision heads for frozen language-model backbones"
+description = "Research implementation for cross-backbone probabilistic decision transfer experiments."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "Apache-2.0"

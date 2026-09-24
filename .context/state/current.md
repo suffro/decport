@@ -13,8 +13,8 @@
 reused through weak rank-128 adapters across SmolLM2-360M, Gemma 3 270M, and TinyLlama-1.1B, gives
 no demonstrated value:
 
-- It is indistinguishable from a scale-matched random core of the same architecture (ID −0.015 to
-  +0.015, OOD −0.011 to +0.006; 0/3 targets pass).
+- It did not meet the preregistered advantage threshold over a scale-matched random core of the
+  same architecture (ID −0.015 to +0.015, OOD −0.011 to +0.006; 0/3 targets pass).
 - It does not beat a target-specific distilled module of similar size (1/3 targets pass).
 - On the JevBench public subset (231/534), only SmolLM2 clears uniform + 5 pp (89/231). Gemma
   scores 73 and TinyLlama 74, against 73.4 expected from uniform guessing.
