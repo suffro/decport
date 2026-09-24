@@ -121,16 +121,20 @@ def test_batched_loss_matches_the_per_decision_objective() -> None:
 
 
 def test_decision_match_is_invariant_to_teacher_logit_offset() -> None:
-    teacher, student = _models()
+    _, student = _models()
     examples = _unlabeled_examples()
-    outputs = collect_teacher_outputs(teacher, examples)
+    outputs = tuple(
+        TeacherOutput(torch.tensor(scores))
+        for scores in ([0.5, -0.5], [1.5, -0.5], [-0.5, 1.5])
+    )
     shifted = tuple(TeacherOutput(output.scores + 17.0) for output in outputs)
     config = DistillationConfig(epochs=1)
 
     baseline = measure_decision_match(student, examples, outputs, config)
     offset = measure_decision_match(student, examples, shifted, config)
 
-    assert offset.kl_divergence == pytest.approx(baseline.kl_divergence)
+    # Softmax is offset-invariant up to float32 KL roundoff.
+    assert offset.kl_divergence == pytest.approx(baseline.kl_divergence, abs=1e-7)
     assert offset.centered_logit_mse == pytest.approx(baseline.centered_logit_mse)
     assert offset.top_choice_agreement == baseline.top_choice_agreement
 

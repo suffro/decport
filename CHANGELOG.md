@@ -9,7 +9,8 @@
 - Add the `FrozenDecisionCore` contract with typed Choice/Noul/Score semantics, the pinned Open-Jev
   2B teacher and its frozen decision core, label-free core distillation with gradient audits, a
   random-core control, a thin pinned JevBench public-subset adapter, and the Open-Jev transfer
-  experiment runner (smoke-tested only).
+  experiment runner. The implementation first passed a bounded smoke test, then the five-seed,
+  three-target accepted run and its bit-exact same-environment reproduction.
 - Backbone extraction now requests a single logit position; hidden states are unchanged and Gemma's
   vocabulary logits no longer dominate memory on long prompts.
 - Add the pre-registered final ship gate (decision 0007).
@@ -20,3 +21,5 @@
   - Scripts: audit, reproduction comparison, JevBench runner, mechanical verdict, and report
     rendering.
   - Final verdict: NO-SHIP. DecPort v0.1 is not released.
+- Add publication-facing repository documentation for the technical research article, citation
+  metadata, an evidence map, and prepared paper-release notes.

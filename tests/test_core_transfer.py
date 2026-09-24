@@ -196,6 +196,7 @@ def test_typed_evaluation_and_match_report_each_decision_type() -> None:
     assert "score_expected_value_mae" in evaluation["by_decision_type"]["score"]
     assert "accuracy" in evaluation["macro_across_decision_types"]
     assert self_match["overall"]["top_choice_agreement"] == 1.0
-    assert self_match["overall"]["kl_divergence"] == pytest.approx(0.0, abs=1e-9)
+    # Float32 KL of identical distributions can round slightly below zero.
+    assert self_match["overall"]["kl_divergence"] == pytest.approx(0.0, abs=1e-7)
     with pytest.raises(ValueError, match="labeled decisions"):
         evaluate_typed(unlabeled, logits)

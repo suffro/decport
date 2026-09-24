@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "Please cite the research article described in preferred-citation."
+title: "DecPort research artifact"
+type: software
+authors:
+  - family-names: "Suffritti"
+    given-names: "Lorenzo"
+date-released: "2026-09-24"
+license: Apache-2.0
+repository-code: "https://github.com/suffro/decport"
+url: "https://github.com/suffro/decport"
+preferred-citation:
+  type: article
+  title: "Distinguishing Cross-Backbone Decision-Behavior Transfer from Frozen-Core Portability"
+  authors:
+    - family-names: "Suffritti"
+      given-names: "Lorenzo"
+  date-published: "2026-09-24"
+  doi: "10.5281/zenodo.22947927"
+  year: 2026
+  url: "https://github.com/suffro/decport/blob/main/paper/decport-technical-research-article.pdf"
